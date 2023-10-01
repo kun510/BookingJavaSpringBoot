@@ -1,0 +1,13 @@
+package com.example.doancuoiky.hostel.request;
+
+
+import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
+import java.util.Date;
+@Data
+public class ReportRq {
+    private Date day;
+    @NotBlank(message = "Reason is required")
+    private String reason ;
+}
