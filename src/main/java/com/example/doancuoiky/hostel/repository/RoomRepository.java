@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room,Long> {
-    @Query("SELECT r FROM Room r")
+    @Query("SELECT r FROM Room r where r.status != 'hired' ")
     List<Room> allRooms();
     Room findRoomById(long id);
     @Query("SELECT r FROM Room r WHERE r.address LIKE %:address%")
@@ -38,4 +38,6 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
     @Query("SELECT r FROM Room r where r.status = 'still empty' and r.user.id = :hostId")
     List<Room> allRoomsEmpty(@Param("hostId") long hostId);
 
+    @Query("SELECT r FROM Room r where r.numberOfStars >= 4 ")
+    List<Room> allRoomsHot();
 }

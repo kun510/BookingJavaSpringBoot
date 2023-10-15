@@ -1,19 +1,32 @@
 package com.example.doancuoiky.hostel.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.doancuoiky.hostel.model.*;
 import com.example.doancuoiky.hostel.repository.*;
 import com.example.doancuoiky.hostel.request.AddRoom;
 import com.example.doancuoiky.hostel.request.BillTotal;
 import com.example.doancuoiky.hostel.request.RegisterRq;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 @Service
 public class HostServiceEmplement implements IhostService {
     @Autowired
@@ -26,8 +39,10 @@ public class HostServiceEmplement implements IhostService {
     private BillRepository billRepository;
     @Autowired
     private RentRepository rentRepository;
-
-
+    @Autowired
+    private FileDataRepository fileDataRepository;
+   @Autowired
+    private Cloudinary cloudinary;
     @Override
     public Users register(RegisterRq users) {
         if (users != null) {
@@ -57,37 +72,56 @@ public class HostServiceEmplement implements IhostService {
         return userRepository.existsByPhone(phone);
     }
 
-
+    private final String FOLDER_PATH = "D:\\hoctap\\javadoan\\hostel\\src\\main\\resources\\img\\";
     @Override
-    public Room addRoom(AddRoom addRoom, long hostId) {
-        if (addRoom != null) {
-            Optional<Users> usersOptional = userRepository.findById(hostId);
-            if (usersOptional.isPresent()) {
-                Users host = usersOptional.get();
-               if(host.getRole().getId() == 2){
-                   Room room = new Room();
-                   room.setAddress(addRoom.getAddress());
-                   room.setArea(addRoom.getArea());
-                   room.setDescription(addRoom.getDescription());
-                   room.setImg(addRoom.getImg());
-                   room.setNumberRoom(addRoom.getNumberRoom());
-                   room.setStatus(addRoom.getStatus());
-                   room.setUtilityBills(addRoom.getUtilityBills());
-                   room.setPrice(addRoom.getPrice());
-                   room.setPeople(addRoom.getPeople());
-                   room.setType(addRoom.getType());
-                   room.setUser(host);
-                   try {
-                       return roomRepository.save(room);
-                   } catch (Exception e) {
-                       throw new RuntimeException("fail add room: " );
-                   }
-               }else {
-                   throw new RuntimeException("User does not have the required role to add a room.");
-               }
+    public Room addRoom(AddRoom addRoom, long hostId, MultipartFile imageFile) {
+        try {
+            if (addRoom != null) {
+                Optional<Users> usersOptional = userRepository.findById(hostId);
+                if (usersOptional.isPresent()) {
+                    Users host = usersOptional.get();
+                    if (host.getRole().getId() == 2) {
+                        Room room = new Room();
+                        room.setAddress(addRoom.getAddress());
+                        room.setArea(addRoom.getArea());
+                        room.setDescription(addRoom.getDescription());
+                        room.setNumberRoom(addRoom.getNumberRoom());
+                        room.setStatus(addRoom.getStatus());
+                        room.setUtilityBills(addRoom.getUtilityBills());
+                        room.setPrice(addRoom.getPrice());
+                        room.setPeople(addRoom.getPeople());
+                        room.setType(addRoom.getType());
+                        room.setUser(host);
+                        Map uploadResult = uploadImage(imageFile);
+                        room.setImg(uploadResult.get("secure_url").toString());
+                        return roomRepository.save(room);
+                    } else {
+                        throw new RuntimeException("User does not have the required role to add a room.");
+                    }
+                }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to upload the image to Cloudinary: " + e.getMessage());
         }
         return null;
+    }
+
+    public String uploadImageToFileSystem(AddRoom addRoom,MultipartFile file) throws IOException {
+        String filePath=FOLDER_PATH+file.getOriginalFilename();
+
+            FileData fileData=fileDataRepository.save(FileData.builder()
+                    .name(file.getOriginalFilename())
+                    .type(file.getContentType())
+                    .filePath(filePath).build());
+           // FileData data = new FileData();
+            file.transferTo(new File(filePath));
+            if (fileData != null) {
+                return "file uploaded successfully : " + filePath;
+            }
+
+        return null;
+
     }
 
     @Override
@@ -135,7 +169,7 @@ public class HostServiceEmplement implements IhostService {
                 usRoom.setAddress(UpdateRoom.getAddress());
                 usRoom.setUtilityBills(UpdateRoom.getUtilityBills());
                 usRoom.setDescription(UpdateRoom.getDescription());
-                usRoom.setImg(UpdateRoom.getImg());
+               // usRoom.setImg(UpdateRoom.getImg());
                 usRoom.setNumberRoom(UpdateRoom.getNumberRoom());
                 usRoom.setStatus(UpdateRoom.getStatus());
                 usRoom.setPrice(UpdateRoom.getPrice());
@@ -198,6 +232,49 @@ public class HostServiceEmplement implements IhostService {
 
     @Override
     public List<Room> getAllRoomByHost(long hostId) {
-        return roomRepository.allRoomsEmpty(hostId);
+        //return roomRepository.allRoomsEmpty(hostId);
+        List<Room> emptyRooms = roomRepository.allRoomsEmpty(hostId);
+        for (Room room : emptyRooms) {
+            String filePath = room.getImg();
+            room.setImg(filePath);
+        }
+        return emptyRooms;
     }
+    public List<byte[]> downloadImagesFromFileSystem(String fileName) throws IOException {
+        List<FileData> fileDataList = fileDataRepository.findAllByName(fileName);
+        List<byte[]> imagesList = new ArrayList<>();
+
+        for (FileData fileData : fileDataList) {
+            String filePath = fileData.getFilePath();
+            byte[] images = Files.readAllBytes(new File(filePath).toPath());
+            imagesList.add(images);
+        }
+
+        return imagesList;
+    }
+    public MediaType determineMediaType(String fileName) {
+        if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+            return MediaType.IMAGE_JPEG;
+        } else if (fileName.endsWith(".png")) {
+            return MediaType.IMAGE_PNG;
+        } else {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
+    }
+
+    public Map uploadImage(MultipartFile file) throws IOException {
+       // String publicId = "Hostel/" + UUID.randomUUID().toString() + System.currentTimeMillis();
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+        String publicId = "Hostel/" + originalFilename;
+        Map params = ObjectUtils.asMap(
+                "public_id", publicId,
+                "folder", "Hostel"
+        );
+        Map result = cloudinary.uploader().upload(file.getBytes(), params);
+        return result;
+    }
+
 }

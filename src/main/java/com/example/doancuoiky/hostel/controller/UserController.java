@@ -2,12 +2,15 @@ package com.example.doancuoiky.hostel.controller;
 
 import com.example.doancuoiky.hostel.model.*;
 import com.example.doancuoiky.hostel.request.*;
+import com.example.doancuoiky.hostel.response.Response;
+import com.example.doancuoiky.hostel.response.ResponseAll;
 import com.example.doancuoiky.hostel.service.IuserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @CrossOrigin
@@ -25,50 +28,55 @@ public class UserController {
     public List<Room> getAllRooms() {
         return iuserService.getAllRoom();
     }
+    @GetMapping("/getallroomhot")
+    public List<Room> getAllRoomsHot() {
+        return iuserService.getAllRoomHot();
+    }
     @PostMapping("/register")
-    public ResponseEntity<String>register(@RequestBody RegisterRq users){
-        ResponseEntity<String> notification = null;
-        try{
-            if (iuserService.isUserPhoneExists(users.getPhone())) {
-                return ResponseEntity.badRequest().body("User with the provided phone already exists.");
-            }else {
-                Users register = iuserService.register(users);
-                if (register.getId() > 0) {
-                    notification = ResponseEntity.status(HttpStatus.CREATED).body("Register successfully");
-                }
-                else {
-                    notification = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("check");
+    public ResponseEntity<ResponseAll> register(@RequestBody @Valid RegisterRq registerRequest) {
+        try {
+            if (iuserService.isUserPhoneExists(registerRequest.getPhone())) {
+                ResponseAll response = new ResponseAll(false, "User with the provided phone already exists.");
+                return ResponseEntity.badRequest().body(response);
+            } else {
+                Users registeredUser = iuserService.register(registerRequest);
+                if (registeredUser != null && registeredUser.getId() > 0) {
+                    ResponseAll response = new ResponseAll(true, "Register successfully");
+                    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                } else {
+                    ResponseAll response = new ResponseAll(false, "Check");
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
                 }
             }
+        } catch (Exception e) {
+            ResponseAll response = new ResponseAll(false, "Register Fail because of DB error");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        catch (Exception e){
-            notification = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Register Fail because of DB error ");
-        }
-        return notification;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRq loginRequest) {
+    public ResponseEntity<Response> login(@RequestBody LoginRq loginRequest) {
         Users user = iuserService.login(loginRequest.getPhone(), loginRequest.getPassword());
         if (user != null) {
             Role userRole = user.getRole();
             if (userRole != null) {
                 if (userRole.getId() == 1) {
-                    return ResponseEntity.ok("Admin");
+                    return ResponseEntity.ok(new Response("Admin"));
                 } else if (userRole.getId() == 2) {
-                    return ResponseEntity.ok("Host");
+                    return ResponseEntity.ok(new Response("Host"));
                 } else if (userRole.getId() == 3) {
-                    return ResponseEntity.ok("User");
+                    return ResponseEntity.ok(new Response("User"));
                 } else {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unknown role");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Unknown role"));
                 }
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User has no role assigned");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("User has no role assigned"));
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("check username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("check username or password"));
         }
     }
+
 
     //update
     @PutMapping("/update")

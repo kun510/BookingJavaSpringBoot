@@ -28,6 +28,7 @@ public interface IuserService {
 
      //lay danh sach tro
     List<Room> getAllRoom();
+    List<Room> getAllRoomHot();
      //lay hoa don
     List<TotalBill> CheckBill(long idRoom);
 

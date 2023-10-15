@@ -24,9 +24,12 @@ public class Room {
 
     @Column(name = "img")
     private String img;
+//    @Lob
+//    @Column(name = "img")
+//    private byte[] img;
 
     @Column(name = "number_stars")
-    private int numberOfStars;
+    private float numberOfStars;
 
     @Column(name = "number_room")
     private int numberRoom;

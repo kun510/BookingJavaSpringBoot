@@ -120,6 +120,11 @@ public class UserServiceEmplement implements IuserService, UserDetailsService{
     }
 
     @Override
+    public List<Room> getAllRoomHot() {
+        return roomRepository.allRoomsHot();
+    }
+
+    @Override
     public List<TotalBill> CheckBill(long idRoom) {
         return billRepository.findAll();
     }
