@@ -1,7 +1,12 @@
 package com.example.doancuoiky.hostel.model;
 
-import javax.persistence.*;
+import com.google.api.client.util.DateTime;
+import lombok.Data;
 
+import javax.persistence.*;
+import java.util.Date;
+
+@Data
 @Entity
 @Table(name = "RoomFavourite")
 public class RoomFavourite {
@@ -15,5 +20,6 @@ public class RoomFavourite {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private Users user;
-
+    @Column(name = "day")
+    private Date day;
 }

@@ -31,6 +31,10 @@ public class Review {
     @JoinColumn(name = "room_id")
     private Room room;
 
+    @ManyToOne()
+    @JoinColumn(name = "boarding_id")
+    private Boarding_host boarding;
+
     @Column(name = "day")
     private Date date;
 }

@@ -16,7 +16,7 @@ public class TotalBill {
     @Column(name = "electric_bill")
     private int electricBill;
     @Column(name = "month")
-    private int month;
+    private String month;
     @Column(name = "sum")
     private int sum;
     @Column(name = "water_bill")
