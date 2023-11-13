@@ -13,20 +13,11 @@ public class Room {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "address")
-    private String address;
-
-    @Column(name = "area")
-    private String area;
-
     @Column(name = "description")
     private String description;
 
     @Column(name = "img")
     private String img;
-//    @Lob
-//    @Column(name = "img")
-//    private byte[] img;
 
     @Column(name = "number_stars")
     private float numberOfStars;
@@ -37,8 +28,11 @@ public class Room {
     @Column(name = "status")
     private String status;
 
-    @Column(name = "utility_bills")
-    private String utilityBills;
+    @Column(name = "ElectricBill")
+    private int ElectricBill;
+
+    @Column(name = "WaterBill")
+    private int WaterBill;
 
     @Column(name = "price")
     private int price;
@@ -50,7 +44,10 @@ public class Room {
     private String type;
     @ManyToOne
     @JoinColumn(name = "id_host")
-    @JsonIgnore
     private Users user;
+
+    @ManyToOne
+    @JoinColumn(name = "id_boarding")
+    private Boarding_host boardingHostel;
 
 }

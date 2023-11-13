@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -32,6 +33,31 @@ public class UserController {
     public List<Room> getAllRoomsHot() {
         return iuserService.getAllRoomHot();
     }
+    @GetMapping("/getAllRoomByBoarding")
+    public List<Room> allRoomByBoarding(@RequestParam long boardingId) {
+        return iuserService.allRoomByBoarding(boardingId);
+    }
+    @GetMapping("/getAllBoarding")
+    public List<Boarding_host> getAllBoarding() {
+        return iuserService.allList();
+    }
+    @GetMapping("/getImgInRoom")
+    public List<ImgRoom> getImgInRoom(@RequestParam long idRoom) {
+        return iuserService.ListImgInRoom(idRoom);
+    }
+    @GetMapping("/getNotificationReceiver")
+    public List<NotificationApp> allNotificationReceiver(@RequestParam long idUserReceiver) {
+        return iuserService.listNotificationReceiver(idUserReceiver);
+    }
+    @GetMapping("/getMyRoom")
+    public List<Rent> MyRoom(@RequestParam long UserId) {
+        return iuserService.getMyRoom(UserId);
+    }
+    @GetMapping("/getallboardingNear")
+    public List<Boarding_host> getAllBoarding(@RequestParam String area) {
+        return iuserService.getBoarding(area);
+    }
+
     @PostMapping("/register")
     public ResponseEntity<ResponseAll> register(@RequestBody @Valid RegisterRq registerRequest) {
         try {
@@ -61,19 +87,19 @@ public class UserController {
             Role userRole = user.getRole();
             if (userRole != null) {
                 if (userRole.getId() == 1) {
-                    return ResponseEntity.ok(new Response("Admin"));
+                    return ResponseEntity.ok(new Response("Admin",user.getId()));
                 } else if (userRole.getId() == 2) {
-                    return ResponseEntity.ok(new Response("Host"));
+                    return ResponseEntity.ok(new Response("Host",user.getId()));
                 } else if (userRole.getId() == 3) {
-                    return ResponseEntity.ok(new Response("User"));
+                    return ResponseEntity.ok(new Response("User",user.getId()));
                 } else {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Unknown role"));
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Unknown role",null));
                 }
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("User has no role assigned"));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("User has no role assigned",null));
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("check username or password"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("check username or password",null));
         }
     }
 
@@ -83,16 +109,52 @@ public class UserController {
     public Users updateuser(@RequestParam("id") long id, @RequestBody UpdateUsers user){
         return iuserService.updateuser(id, user);
     }
+    @GetMapping("/getRoomFavourite")
+    public List<RoomFavourite> getAllRoomFavourite(@RequestParam("idUser") long idUser){
+        return iuserService.listRoomFavourite(idUser);
+    }
+    //addtoken
+    @PutMapping("/addtoken")
+    public ResponseEntity<String> addtoken(@RequestParam("token_device") String token_device, @RequestParam("userID") long userID) {
+        ResponseAll response = iuserService.addTokenDevice(token_device, userID);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok("Token added successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + response.getMessage());
+        }
+    }
+    @PostMapping("/notification")
+    public ResponseEntity<?> sendNotification(@RequestBody NotificationMessaging notificationMessaging){
+        ResponseAll responseAll =  iuserService.sendNotificationByToken(notificationMessaging);
+        if (responseAll.isSuccess()){
+            return ResponseEntity.ok(iuserService.sendNotificationByToken(notificationMessaging));
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + responseAll.getMessage());
+        }
+    }
+
     //delete
     @DeleteMapping("/delete/{id}")
     public boolean  deleteuser(@PathVariable long id){
         return iuserService.deleteuser(id);
     }
 
+    @DeleteMapping("/deleteRoomFavourite")
+    public boolean  deleteRoomFavourite(@RequestParam long idRoomFavourite,long idUser){
+       boolean deleteRoom = iuserService.deleteRoomFavourite(idRoomFavourite,idUser);
+       if (deleteRoom){
+           return true;
+       }else {
+           return false;
+       }
+    }
+
     @PostMapping("/rent")
-    public ResponseEntity<?> rent(@RequestParam long idRoom,long idUser) {
+    public ResponseEntity<?> rent(@RequestParam long idRoom,long idUser, int numberUserInRoom) {
         try {
-            Rent result = iuserService.Rent(idRoom, idUser);
+            Rent result = iuserService.Rent(idRoom, idUser,numberUserInRoom);
             if (result != null) {
                 return ResponseEntity.ok("Registered room rental successfully");
             } else {
@@ -103,20 +165,32 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error: " + e.getMessage());
         }
     }
-    @PostMapping("/report")
-    public ResponseEntity<?> report(@RequestBody ReportRq report,@RequestParam long idRoom,@RequestParam long idUser){
+    @PostMapping("/addRoomFavourite")
+    public ResponseEntity<?> RoomFavourite(@RequestParam long idRoom,long idUser) {
         try {
-            Report reportAdd = iuserService.Report(report,idRoom,idUser);
-            if (reportAdd != null){
-                return ResponseEntity.ok("Thanks for reporting");
-            }else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to report");
+            ResponseAll result = iuserService.addRoomFavourite(idUser, idRoom);
+            if (result != null) {
+                return ResponseEntity.ok(result);
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to register room rental");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error: " + e.getMessage());
         }
     }
+
+    @PostMapping("/report")
+    public ResponseEntity<ResponseAll> report(@Valid @ModelAttribute ReportRq report, @RequestParam("image1") MultipartFile imageFile1, @RequestParam("image2") MultipartFile imageFile2, @RequestParam("image3") MultipartFile imageFile3, @RequestParam long idRoom, @RequestParam long idUser) {
+        try {
+            ResponseAll response = iuserService.Report(report, imageFile1, imageFile2, imageFile3, idRoom, idUser);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseAll(false, "Internal server error: " + e.getMessage()));
+        }
+    }
+
 
     @PostMapping("/review")
     public ResponseEntity<?> review(@RequestBody ReviewRq reviewRq,@RequestParam long idRoom,@RequestParam long idUser){
@@ -126,6 +200,20 @@ public class UserController {
                 return ResponseEntity.ok("Thanks for review");
             }else {
              return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to review");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error: " + e.getMessage());
+        }
+    }
+    @PostMapping("/ReviewBoarding")
+    public ResponseEntity<?> ReviewBoarding(@RequestBody ReviewRq reviewRq,@RequestParam long idBoarding,@RequestParam long idUser){
+        try {
+            Review review = iuserService.ReviewBoarding(reviewRq,idBoarding,idUser);
+            if (review != null){
+                return ResponseEntity.ok("Thanks for review");
+            }else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to review");
             }
         }catch (Exception e){
             e.printStackTrace();

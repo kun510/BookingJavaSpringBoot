@@ -26,6 +26,8 @@ public class Users {
     private String name;
     @Column(name = "confirmation_status")
     private String confirmation_status;
+    @Column(name = "token_Device")
+    private String token_device;
     @ManyToOne(optional = true)
     @JoinColumn(name = "id_role")
     private Role role;

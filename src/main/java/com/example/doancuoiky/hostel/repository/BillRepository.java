@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface BillRepository extends JpaRepository<TotalBill, Long> {
     @Query("SELECT b FROM TotalBill b")
     List<TotalBill> listTotal();
-    Optional<TotalBill> findByRentAndMonth(Rent rent, int month);
+    Optional<TotalBill> findByRentAndMonth(Rent rent, String month);
     @Query("SELECT tb FROM TotalBill tb JOIN tb.rent r WHERE r.user.id = :userId")
     List<TotalBill> findTotalBillsByUserId(@Param("userId") long userId);
 }

@@ -1,11 +1,8 @@
 package com.example.doancuoiky.hostel.service;
 
 import com.example.doancuoiky.hostel.model.*;
-import com.example.doancuoiky.hostel.request.AddRoom;
-import com.example.doancuoiky.hostel.request.BillTotal;
-import com.example.doancuoiky.hostel.request.RegisterRq;
-import com.example.doancuoiky.hostel.request.UpdateUsers;
-import org.springframework.http.MediaType;
+import com.example.doancuoiky.hostel.request.*;
+import com.example.doancuoiky.hostel.response.ResponseAll;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -17,19 +14,21 @@ public interface IhostService {
     Users register(RegisterRq Users);
     boolean isUserPhoneExists(String phone) ;
    // Room addRoom(AddRoom addRoom, long host, MultipartFile imageFile);
-   Room addRoom(AddRoom addRoom, long hostId, MultipartFile imageFile) throws IOException;
-    TotalBill Bill(BillTotal totalBill, long idRent);
+   ResponseAll addRoom(AddRoom addRoom, long boardingId, long hostId, MultipartFile imageFile) throws IOException;
+    ResponseAll addBoarding_hostel(AddBoarding addBoarding, long hostId, MultipartFile imageFile)throws IOException;
+    TotalBill Bill(BillTotal totalBill, long idRent,long hostId);
     String UpdateRoom(long id, AddRoom UpdateRoom);
-    String DeleteRoom(long id);
+    String DeleteRoom(Long id);
     String AddUserInRoom(long roomId);
     List<Rent> getAllRentConfirm(long hostId);
     List<Users> getAllUser(long hostId);
     List<Room> getAllRoomByHost(long hostId);
 
-    String uploadImageToFileSystem(AddRoom addRoom,MultipartFile file) throws IOException;
-    List<byte[]> downloadImagesFromFileSystem(String fileName) throws IOException;
-    MediaType determineMediaType(String fileName);
+    List<Boarding_host> getAllBoardingHostelConfirm(long hostId);
 
-    //test
+    //load img
     Map uploadImage(MultipartFile file) throws IOException;
+     ImgRoom addImgRoom(long idRoom, long hostId,MultipartFile imageFile1,MultipartFile imageFile2,MultipartFile
+            imageFile3,MultipartFile imageFile4,MultipartFile imageFile5) throws IOException;
+
 }

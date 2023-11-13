@@ -22,4 +22,6 @@ public class Rent {
     private Users user;
     @Column(name = "status")
     private String status;
+    @Column(name = "peopleInRoom")
+    private int peopleInRoom;
 }
