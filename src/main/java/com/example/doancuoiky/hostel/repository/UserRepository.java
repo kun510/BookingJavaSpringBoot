@@ -53,7 +53,7 @@ public interface UserRepository extends JpaRepository<Users,Long> {
 
     @Query("SELECT u FROM Users u WHERE u.id= :id and u.role = '1'")
     Users checkAdmin(@Param("id") Long id);
-    @Query("SELECT u FROM Users u where u.role = '3' and u.id = :userID")
+    @Query("SELECT u FROM Users u where  u.id = :userID")
     List<Users> getUserCurrent(@Param("userID") long userID);
 
     @Query("select u.token_device from Users u where u.id = :userID")
@@ -70,5 +70,8 @@ public interface UserRepository extends JpaRepository<Users,Long> {
     @Query("SELECT u FROM Users u where u.id = :userID")
     List<Users> UserCurrent(@Param("userID") long userID);
 
-
+    @Transactional
+    @Modifying
+    @Query("UPDATE Users r SET r.password = :password where r.id = :userID")
+    void changePassword(@Param("password") String password,@Param("userID") long userID);
 }

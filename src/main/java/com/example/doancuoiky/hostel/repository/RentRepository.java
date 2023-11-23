@@ -24,6 +24,16 @@ public interface RentRepository extends JpaRepository<Rent, Long> {
     @Modifying
     @Query("UPDATE Rent r SET r.status = 'Confirmed successfully' WHERE r.room.id = :roomId")
     void updateRentStatusByRoomId(@Param("roomId") long roomId);
+    @Transactional
+    @Modifying
+    @Query("UPDATE Rent r SET r.status = 'Confirmed successfully' WHERE r.id = :rentId")
+    Integer updateRentStatusByRoomIdMobile(@Param("rentId") long rentId);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Rent r SET r.status = 'Cancel' WHERE r.id = :rentId")
+    Integer cancelRentStatusByRoomIdMobile(@Param("rentId") long rentId);
+
     @Query("SELECT DISTINCT r FROM Rent r WHERE r.room.user.id = :hostId and r.status = 'Confirmed successfully'")
     List<Rent> findUsersByHostId(@Param("hostId") Long hostId);
 

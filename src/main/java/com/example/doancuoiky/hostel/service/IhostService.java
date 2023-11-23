@@ -20,9 +20,12 @@ public interface IhostService {
     String UpdateRoom(long id, AddRoom UpdateRoom);
     String DeleteRoom(Long id);
     String AddUserInRoom(long roomId);
+    String AddUserInRoomMobile(long roomId,long rentId);
+    String CancelUserInRoomMobile(long roomId,long rentId);
     List<Rent> getAllRentConfirm(long hostId);
     List<Rent> getAllUser(long hostId);
     List<Room> getAllRoomByHost(long hostId);
+    List<Room> AllRoom(long hostId);
     List<ListandCoutRoom>  RoomEmptyByBoarding(long HostId);
     List<Boarding_host> getAllBoardingHostelConfirm(long hostId);
     List<Boarding_host> getAllBoardingByUser(long hostId);

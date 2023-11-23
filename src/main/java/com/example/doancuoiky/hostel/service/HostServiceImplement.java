@@ -264,10 +264,10 @@ public class HostServiceImplement implements IhostService {
 
     @Override
     public String AddUserInRoom(long roomId) {
-        rentRepository.updateRentStatusByRoomId(roomId);
-        roomRepository.updateRoomStatusById(roomId);
         Optional<Rent> updatedRentOptional = rentRepository.findById(roomId);
         if (updatedRentOptional.isPresent()) {
+            rentRepository.updateRentStatusByRoomId(roomId);
+            roomRepository.updateRoomStatusById(roomId);
             Rent updatedRent = updatedRentOptional.get();
             if ("Confirmed successfully".equals(updatedRent.getStatus())) {
                 NotificationApp notificationApp = new NotificationApp();
@@ -283,6 +283,54 @@ public class HostServiceImplement implements IhostService {
             }
         } else {
             return "Room ID not found.";
+        }
+    }
+
+    @Override
+    public String AddUserInRoomMobile(long roomId,long rentId) {
+        Optional<Rent> updatedRentOptional = rentRepository.findById(rentId);
+        if (updatedRentOptional.isPresent()) {
+           Integer checkUpdateRent = rentRepository.updateRentStatusByRoomIdMobile(rentId);
+            Integer checkUpdateRoom =  roomRepository.updateRoomStatusById(roomId);
+           if (checkUpdateRent > 0 && checkUpdateRoom > 0){
+               Rent updatedRent = updatedRentOptional.get();
+               NotificationApp notificationApp = new NotificationApp();
+               notificationApp.setUser_id_sender(rentRepository.idHostByRent(roomId));
+               notificationApp.setUser_id_receiver(rentRepository.idUserByRent(roomId));
+               notificationApp.setContent("Rent successfully room " + updatedRent.getId());
+               Date currentTime = new Date();
+               notificationApp.setTime(new Date(currentTime.getTime()));
+               notificationRepository.save(notificationApp);
+               return "Room confirmation successful!";
+           }else {
+               return "update failed.";
+           }
+
+        } else {
+            return "Rent ID not found.";
+        }
+    }
+    @Override
+    public String CancelUserInRoomMobile(long roomId,long rentId) {
+        Optional<Rent> updatedRentOptional = rentRepository.findById(rentId);
+        if (updatedRentOptional.isPresent()) {
+            Integer checkUpdateRent = rentRepository.cancelRentStatusByRoomIdMobile(rentId);
+            if (checkUpdateRent > 0 ){
+                Rent updatedRent = updatedRentOptional.get();
+                NotificationApp notificationApp = new NotificationApp();
+                notificationApp.setUser_id_sender(rentRepository.idHostByRent(roomId));
+                notificationApp.setUser_id_receiver(rentRepository.idUserByRent(roomId));
+                notificationApp.setContent("Rent fail room " + updatedRent.getId());
+                Date currentTime = new Date();
+                notificationApp.setTime(new Date(currentTime.getTime()));
+                notificationRepository.save(notificationApp);
+                return "Room cancel successful!";
+            }else {
+                return "update failed.";
+            }
+
+        } else {
+            return "Rent ID not found.";
         }
     }
 
@@ -306,6 +354,10 @@ public class HostServiceImplement implements IhostService {
             room.setImg(filePath);
         }
         return emptyRooms;
+    }
+    @Override
+    public List<Room> AllRoom(long hostId) {
+        return roomRepository.allRoomsNe(hostId);
     }
 
     @Override

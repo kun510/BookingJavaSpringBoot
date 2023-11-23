@@ -44,4 +44,5 @@ public interface BoardingRepository extends JpaRepository<Boarding_host, Long> {
     @Modifying
     @Query("UPDATE Boarding_host r SET r.status = 'cancel' WHERE r.id = :boardingId")
     void updateCancelBoardingStatusById(@Param("boardingId") long boardingId);
+
 }

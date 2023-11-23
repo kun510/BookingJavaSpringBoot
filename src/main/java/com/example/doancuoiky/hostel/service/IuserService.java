@@ -13,6 +13,7 @@ public interface IuserService {
 
     //ham them user
     Users register(RegisterRq Users);
+    ResponseAll changePassword(long id,String password);
     Users getUserByUsername(String phone);
      // check username
     Users login(String phone, String password);

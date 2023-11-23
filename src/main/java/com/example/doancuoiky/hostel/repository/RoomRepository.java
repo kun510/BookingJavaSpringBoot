@@ -36,11 +36,13 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
     @Transactional
     @Modifying
     @Query("UPDATE Room r SET r.status = 'hired' WHERE r.id = :roomId")
-    void updateRoomStatusById(@Param("roomId") long roomId);
+    Integer updateRoomStatusById(@Param("roomId") long roomId);
 
     @Query("SELECT r FROM Room r where r.status = 'empty room' and r.user.id = :hostId")
     List<Room> allRoomsEmpty(@Param("hostId") long hostId);
 
+    @Query("SELECT r FROM Room r where r.user.id = :hostId")
+    List<Room> allRoomsNe(@Param("hostId") long hostId);
     @Query("SELECT r FROM Room r where r.numberOfStars >= 4 ")
     List<Room> allRoomsHot();
 

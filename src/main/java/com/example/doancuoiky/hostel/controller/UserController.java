@@ -110,25 +110,32 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestBody LoginRq loginRequest) {
         Users user = iuserService.login(loginRequest.getPhone(), loginRequest.getPassword());
-        if (user != null) {
-            Role userRole = user.getRole();
-            if (userRole != null) {
-                if (userRole.getId() == 1) {
-                    return ResponseEntity.ok(new Response("Admin",user.getId()));
-                } else if (userRole.getId() == 2) {
-                    return ResponseEntity.ok(new Response("Host",user.getId()));
-                } else if (userRole.getId() == 3) {
-                    return ResponseEntity.ok(new Response("User",user.getId()));
-                } else {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Unknown role",null));
-                }
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Check username or password", null));
+        }
+        String confirmationStatus = user.getConfirmation_status();
+        if ("wait for confirmation".equals(confirmationStatus)) {
+            return ResponseEntity.ok(new Response("Wait for confirmation", null));
+        } else if ("ban".equals(confirmationStatus)) {
+            return ResponseEntity.ok(new Response("User is banned", null));
+        }
+
+        Role userRole = user.getRole();
+        if (userRole != null) {
+            if (userRole.getId() == 1) {
+                return ResponseEntity.ok(new Response("Admin", user.getId()));
+            } else if (userRole.getId() == 2) {
+                return ResponseEntity.ok(new Response("Host", user.getId()));
+            } else if (userRole.getId() == 3) {
+                return ResponseEntity.ok(new Response("User", user.getId()));
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("User has no role assigned",null));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("Unknown role", null));
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("check username or password",null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Response("User has no role assigned", null));
         }
     }
+
 
     //update
     @PutMapping("/update")
@@ -150,6 +157,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + response.getMessage());
         }
     }
+    @PutMapping("/changePassword")
+    public ResponseEntity<ResponseAll> changePassword(@RequestParam("password") String password, @RequestParam("userID") long userID) {
+        ResponseAll response = iuserService.changePassword(userID,password);
+        if (response.isSuccess()) {
+            return new ResponseEntity<>(new ResponseAll(true,"Change Password successfully"),HttpStatus.OK);
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseAll(false, response.getMessage()));
+        }
+    }
+
     @PostMapping("/notification")
     public ResponseEntity<?> sendNotification(@RequestBody NotificationMessaging notificationMessaging){
         ResponseAll responseAll =  iuserService.sendNotificationByToken(notificationMessaging);

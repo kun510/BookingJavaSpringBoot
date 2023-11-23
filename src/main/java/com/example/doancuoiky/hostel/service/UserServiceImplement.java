@@ -94,7 +94,7 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
             users1.setPhone(users.getPhone());
             users1.setAddress(users.getAddress());
             users1.setEmail(users.getEmail());
-            users1.setImg(users.getImg());
+            users1.setImg("users.getImg()");
             users1.setName(users.getName());
             Role role = new Role();
             role.setId(3L);
@@ -108,6 +108,17 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
             }
         }
         return null;
+    }
+
+    @Override
+    public ResponseAll changePassword(long id,String password) {
+        try {
+            String maHoa = passwordEncoder.encode(password);
+            userRepository.changePassword(maHoa,id);
+            return new ResponseAll(true, "successfully saved token.");
+        } catch (Exception e) {
+            return new ResponseAll(false, "Error: " + e.getMessage());
+        }
     }
 
     @Override

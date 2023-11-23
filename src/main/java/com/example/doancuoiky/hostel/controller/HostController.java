@@ -155,6 +155,27 @@ public class HostController {
             return ResponseEntity.badRequest().body("Status update failed");
         }
     }
+
+    @PutMapping("/addUserInRoomMobile")
+    public ResponseEntity<ResponseAll> updateRentStatusMobile(@RequestParam("roomId") long roomId,@RequestParam("rentId") long rentId) {
+        String result = ihostService.AddUserInRoomMobile(roomId,rentId);
+        if ("Room confirmation successful!".equals(result)) {
+            return new ResponseEntity<>(new ResponseAll(true,"Status update successful"),HttpStatus.OK);
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseAll(false, result));
+        }
+    }
+
+    @PutMapping("/cancelUserInRoomMobile")
+    public ResponseEntity<ResponseAll> cancelRentStatusMobile(@RequestParam("roomId") long roomId,@RequestParam("rentId") long rentId) {
+        String result = ihostService.CancelUserInRoomMobile(roomId,rentId);
+        if ("Room cancel successful!".equals(result)) {
+            return new ResponseEntity<>(new ResponseAll(true,"Status update successful"),HttpStatus.OK);
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseAll(false, result));
+        }
+    }
+
     @GetMapping("/usersByHost")
     public ResponseEntity<List<Rent>> getUsersByHost(@RequestParam long hostId) {
         List<Rent> users = ihostService.getAllUser(hostId);
@@ -183,6 +204,15 @@ public class HostController {
             return ResponseEntity.notFound().build();
         } else {
             return ResponseEntity.ok(roomsAndImages);
+        }
+    }
+    @GetMapping("/AllRoomByHost")
+    public ResponseEntity<List<Room>> getAllRoomByHost(@RequestParam long hostId) {
+        List<Room> rooms = ihostService.AllRoom(hostId);
+        if (rooms.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        } else {
+            return ResponseEntity.ok(rooms);
         }
     }
 
