@@ -2,6 +2,7 @@ package com.example.doancuoiky.hostel.controller;
 
 
 import com.example.doancuoiky.hostel.model.Boarding_host;
+import com.example.doancuoiky.hostel.model.Report;
 import com.example.doancuoiky.hostel.model.Users;
 import com.example.doancuoiky.hostel.response.ResponseAll;
 import com.example.doancuoiky.hostel.service.IadminService;
@@ -26,19 +27,33 @@ public class AdminController {
         return boardingHostList;
     }
     @GetMapping("/getAllUser")
-    public Object getUser(@RequestParam("idAdmin") long adminId) {
-        List<Users> usersList = iadminService.user(adminId);
-
+    public Object getUser() {
+        List<Users> usersList = iadminService.user();
         return usersList;
     }
+    @GetMapping("/getReport1")
+    public Object getReport1() {
+        List<Report> reports1 = iadminService.ListReportTopTime1();
+        return reports1;
+    }
+    @GetMapping("/getReport2")
+    public Object getReport2() {
+        List<Report> reports2 = iadminService.ListReportTopTime2();
+        return reports2;
+    }
+    @GetMapping("/getReport3")
+    public Object getReport3() {
+        List<Report> reports3 = iadminService.ListReportTopTime3();
+        return reports3;
+    }
     @GetMapping("/getAllHost")
-    public Object  getHost(@RequestParam("idAdmin") long adminId) {
-        List<Users> usersList = iadminService.host(adminId);
+    public Object  getHost() {
+        List<Users> usersList = iadminService.host();
         return usersList;
     }
     @GetMapping("/getHostWait")
-    public Object  getHostWait(@RequestParam("idAdmin") long adminId) {
-        List<Users> usersList = iadminService.WaitHost(adminId);
+    public Object  getHostWait() {
+        List<Users> usersList = iadminService.WaitHost();
         if (usersList == null){
             return "Not Host accept";
         }
@@ -62,6 +77,62 @@ public class AdminController {
             return ResponseEntity.badRequest().body(response);
         }
     }
-    //làm report 1 lần thông báo nhắc nhỡ,2 lần hạn chế đăng trọ 2 ngày,3 lần xoá tài khoản
-    //yêu cầu gỡ báo cáo , 1 gửi hình ảnh chứng minh, 2 user báo cáo gửi xác nhận gỡ báo cáo
+    @GetMapping("/countUser")
+    public int countUser(){
+       return iadminService.countUser();
+    }
+    @GetMapping("/countHost")
+    public int countHost(){
+        return iadminService.countHost();
+    }
+    @GetMapping("/countRoom")
+    public int countRoom(){
+        return iadminService.countRoom();
+    }
+    @GetMapping("/countReport")
+    public int countReport(){
+        return iadminService.countReport();
+    }
+    @GetMapping("/listBan")
+    public List<Users> ListBan(){
+        return iadminService.ListBan();
+    }
+
+    @PutMapping("/banHost")
+    public ResponseEntity<ResponseAll> banHost(@RequestParam("adminId") long adminId,@RequestParam("hostId") long hostId) {
+        ResponseAll response = iadminService.Ban(adminId,hostId);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    @PutMapping("/unBanHost")
+    public ResponseEntity<ResponseAll> unBanHost(@RequestParam("adminId") long adminId,@RequestParam("hostId") long hostId) {
+        ResponseAll response = iadminService.unBan(adminId,hostId);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @PutMapping("/CancelHost")
+    public ResponseEntity<ResponseAll> CancelHost(@RequestParam("adminId") long adminId,@RequestParam("hostId") long hostId) {
+        ResponseAll response = iadminService.UpdateCancelHostStatus(adminId,hostId);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    @PutMapping("/CancelBoarding")
+    public ResponseEntity<ResponseAll> CancelBoarding(@RequestParam("adminId") long adminId,@RequestParam("boardingId") long boardingId) {
+        ResponseAll response = iadminService.UpdateCancelBoardingStatus(adminId,boardingId);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 }

@@ -21,11 +21,17 @@ public interface IhostService {
     String DeleteRoom(Long id);
     String AddUserInRoom(long roomId);
     List<Rent> getAllRentConfirm(long hostId);
-    List<Users> getAllUser(long hostId);
+    List<Rent> getAllUser(long hostId);
     List<Room> getAllRoomByHost(long hostId);
-
+    List<ListandCoutRoom>  RoomEmptyByBoarding(long HostId);
     List<Boarding_host> getAllBoardingHostelConfirm(long hostId);
+    List<Boarding_host> getAllBoardingByUser(long hostId);
+    int countRoomEmpty(long BoardingId,long HostId);
+    int countRoomEmptyReal(long HostId);
+    int contRoom(long HostId);
+   int contRent(long HostId);
 
+   List<Rent> getUserInRent(long HostId);
     //load img
     Map uploadImage(MultipartFile file) throws IOException;
      ImgRoom addImgRoom(long idRoom, long hostId,MultipartFile imageFile1,MultipartFile imageFile2,MultipartFile

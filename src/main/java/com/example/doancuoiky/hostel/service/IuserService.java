@@ -3,6 +3,7 @@ package com.example.doancuoiky.hostel.service;
 import com.example.doancuoiky.hostel.model.*;
 import com.example.doancuoiky.hostel.request.*;
 import com.example.doancuoiky.hostel.response.ResponseAll;
+import com.example.doancuoiky.hostel.response.ResponseToken;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,7 +19,7 @@ public interface IuserService {
     //check phone
       boolean isUserPhoneExists(String phone) ;
     //chinh sua
-     Users updateuser(long id, UpdateUsers Users);
+     Users updateuser(long id, UpdateUsers Users,MultipartFile avt);
 
     //xoa user
       boolean deleteuser(long id);
@@ -26,7 +27,7 @@ public interface IuserService {
     boolean deleteRoomFavourite(long idRoomFavourite,long idUser);
     //lay danh sach
      List<Users> getAlluser();
-
+    List<Users> getUserCurrent(long idUser);
      //lay danh sach tro
     List<Room> getAllRoom();
     List<Room> getAllRoomHot();
@@ -46,7 +47,7 @@ public interface IuserService {
     Review Review(ReviewRq reviewRq,long idRoom,long idUser);
 
     Review ReviewBoarding(ReviewRq reviewRq,long idBoarding,long idUser);
-    List<Room> searchRooms(String address, String price, String area,String people,String type);
+    List<Room> searchRooms(Integer  price, String area,String people,String type);
 
     List<TotalBill> getAllBill(long idUser);
 
@@ -62,4 +63,11 @@ public interface IuserService {
     ResponseAll addRoomFavourite(long userId,long roomId);
 
     List<NotificationApp> listNotificationReceiver(long userId);
+
+    ResponseToken getToken(long idUser);
+
+    List<Users> UserCurrent(long UserId);
+
+    List<String> tokenUser(long hostId);
+
 }

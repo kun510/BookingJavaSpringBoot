@@ -10,6 +10,5 @@ import javax.persistence.*;
 public class UpdateUsers {
     private String address;
     private String email;
-    private String img;
     private String name;
 }

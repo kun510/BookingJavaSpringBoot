@@ -27,6 +27,5 @@ public class Boarding_host {
     private float numberOfStars;
     @ManyToOne
     @JoinColumn(name = "id_host")
-    @JsonIgnore
     private Users user;
 }

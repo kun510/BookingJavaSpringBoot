@@ -7,6 +7,7 @@ import com.example.doancuoiky.hostel.model.*;
 import com.example.doancuoiky.hostel.repository.*;
 import com.example.doancuoiky.hostel.request.*;
 import com.example.doancuoiky.hostel.response.ResponseAll;
+import com.example.doancuoiky.hostel.response.ResponseToken;
 import com.google.api.client.util.DateTime;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -129,14 +130,20 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
     }
 
     @Override
-    public Users updateuser(long id, UpdateUsers usermodels) {
+    public Users updateuser(long id, UpdateUsers usermodels, MultipartFile avt) {
         if (usermodels != null) {
             Users usModel = userRepository.getOne(id);
             if (usModel != null) {
                 usModel.setName(usermodels.getName());
                 usModel.setEmail(usermodels.getEmail());
                 usModel.setAddress(usermodels.getAddress());
-                usModel.setImg(usermodels.getImg());
+                Map uploadResult1 = null;
+                try {
+                    uploadResult1 = uploadImageAvt(avt);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                usModel.setImg(uploadResult1.get("secure_url").toString());
                 return userRepository.save(usModel);
             }
         }
@@ -174,6 +181,11 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
     @Override
     public List<Users> getAlluser() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public List<Users> getUserCurrent(long idUser) {
+        return userRepository.getUserCurrent(idUser);
     }
 
     @Override
@@ -276,59 +288,68 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
 
     @Override
     public ResponseAll Report(ReportRq report, MultipartFile imageFile1, MultipartFile imageFile2, MultipartFile imageFile3, long idRoom, long idUser) {
-        Optional<Report> reportCheck = reportRepository.findUsersInReport(idUser,idRoom);
-        if (reportCheck.isPresent()){
-            return new ResponseAll(false, "User Reported");
+        if (reportRepository.findUsersInReport(idRoom, idUser) > 0) {
+            return new ResponseAll(false, "User has already reported this room.");
         }
-        Optional<Users> usersOptional = userRepository.findById(idUser);
-        int findBoarding = rentRepository.findBoardingIdByRoomId(idRoom);
-        List<Rent> checkUserBelongsToBoarding = rentRepository.checkUserBelongsToBoarding(idUser,idRoom);
 
-        if (findBoarding > 0 && checkUserBelongsToBoarding != null){
-            if (usersOptional.isPresent()) {
-                Users user = usersOptional.get();
-                Optional<Room> roomOptional = roomRepository.findById(idRoom);
-                if (roomOptional.isPresent()) {
-                    Room room = roomOptional.get();
-                    Date currentTime = new Date();
-                    Report reportAdd = new Report();
-                    int checkRoom = reportRepository.checkRoom(idRoom);
-                    if(checkRoom>0){
-                        int currentTimesReport = reportAdd.getTimes_report();
-                        currentTimesReport++;
-                        reportAdd.setTimes_report(currentTimesReport);
-                    }else {
-                        reportAdd.setTimes_report(0);
+            Optional<Users> usersOptional = userRepository.findById(idUser);
+            int findBoarding = rentRepository.findBoardingIdByRoomId(idRoom);
+            List<Rent> checkUserBelongsToBoarding = rentRepository.checkUserBelongsToBoarding(idUser, idRoom);
+
+            if (findBoarding > 0 && checkUserBelongsToBoarding != null) {
+                if (usersOptional.isPresent()) {
+                    Users user = usersOptional.get();
+                    Optional<Room> roomOptional = roomRepository.findById(idRoom);
+                    if (roomOptional.isPresent()) {
+                        Room room = roomOptional.get();
+                        Date currentTime = new Date();
+                        Report reportAdd = new Report();
+                        int checkRoom = reportRepository.checkRoom(idRoom);
+                        if (checkRoom > 0) {
+                            reportRepository.updateNumberReport(idRoom);
+                            try {
+                                Map uploadResult1 = uploadImage(imageFile1);
+                                reportAdd.setImg1(uploadResult1.get("secure_url").toString());
+                                Map uploadResult2 = uploadImage(imageFile2);
+                                reportAdd.setImg2(uploadResult2.get("secure_url").toString());
+                                Map uploadResult3 = uploadImage(imageFile3);
+                                reportAdd.setImg3(uploadResult3.get("secure_url").toString());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                return new ResponseAll(false, "Error uploading images.");
+                            }
+                        } else {
+                            try {
+                                Map uploadResult1 = uploadImage(imageFile1);
+                                reportAdd.setImg1(uploadResult1.get("secure_url").toString());
+                                Map uploadResult2 = uploadImage(imageFile2);
+                                reportAdd.setImg2(uploadResult2.get("secure_url").toString());
+                                Map uploadResult3 = uploadImage(imageFile3);
+                                reportAdd.setImg3(uploadResult3.get("secure_url").toString());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                return new ResponseAll(false, "Error uploading images.");
+                            }
+                            reportAdd.setTimes_report(1);
+                        }
+                        reportAdd.setReason(report.getReason());
+                        reportAdd.setRoom(room);
+                        reportAdd.setUser(user);
+                        reportAdd.setDay(currentTime);
+                        reportRepository.save(reportAdd);
+                        return new ResponseAll(true, "The report has been successfully saved.");
+                    } else {
+                        return new ResponseAll(false, "Room not found.");
                     }
-
-                    reportAdd.setReason(report.getReason());
-
-                    try {
-                        Map uploadResult1 = uploadImage(imageFile1);
-                        reportAdd.setImg1(uploadResult1.get("secure_url").toString());
-                        Map uploadResult2 = uploadImage(imageFile2);
-                        reportAdd.setImg2(uploadResult2.get("secure_url").toString());
-                        Map uploadResult3 = uploadImage(imageFile3);
-                        reportAdd.setImg3(uploadResult3.get("secure_url").toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return new ResponseAll(false, "Error uploading images.");
-                    }
-                    reportAdd.setRoom(room);
-                    reportAdd.setUser(user);
-                    reportAdd.setDay(currentTime);
-                    reportRepository.save(reportAdd);
-                    return new ResponseAll(true, "The report has been successfully saved.");
                 } else {
-                    return new ResponseAll(false, "Room not found.");
+                    return new ResponseAll(false, "User not found.");
                 }
             } else {
-                return new ResponseAll(false, "User not found.");
+                return new ResponseAll(false, "User not in Boarding Hostel");
             }
-        }else {
-            return new ResponseAll(false, "User not in Boarding Hostel");
-        }
+
     }
+
 
     @Override
     public Review Review(ReviewRq reviewRq, long idRoom, long idUser) {
@@ -409,22 +430,19 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
     }
 
     @Override
-    public List<Room> searchRooms(String address, String price, String area, String people, String type) {
+    public List<Room> searchRooms(Integer price, String area, String people, String type) {
         List<Room> rooms = new ArrayList<>();
 
-//        if (address != null && !address.isEmpty()) {
-//            rooms.addAll(roomRepository.findByAddressContaining(address));
-//        }
-
-        if (price != null && !price.isEmpty()) {
+        if (price != null && price != 0) {
             rooms.addAll(roomRepository.findByPrice(price));
         }
-//
-//        else if (area != null && !area.isEmpty()) {
-//            rooms.addAll(roomRepository.findByArea(area));
-//        }
+
+        else if (area != null && !area.isEmpty()) {
+            rooms.addAll(roomRepository.findByArea(area));
+        }
         else if (people != null && !people.isEmpty()) {
             rooms.addAll(roomRepository.findByPeople(people));
+
         } else if (type != null && !type.isEmpty()) {
             rooms.addAll(roomRepository.findByType(type));
         } else {
@@ -483,6 +501,30 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
         return notificationRepository.allNotificationReceiver(userId);
     }
 
+    @Override
+    public ResponseToken getToken(long idUser) {
+        try {
+            String token = userRepository.getToken(idUser);
+            if (token != null) {
+               return new ResponseToken(true,"token Successfully",token);
+            } else {
+               return new ResponseToken(false,"token not found",null);
+            }
+        } catch (Exception e) {
+            return new ResponseToken(false, "Error: ", e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Users> UserCurrent(long UserId) {
+        return userRepository.UserCurrent(UserId);
+    }
+
+    @Override
+    public List<String> tokenUser(long hostId) {
+        return rentRepository.tokenUser(hostId);
+    }
+
 
     @Scheduled(cron = "0 40 7 * * ?")
     public void updateRoomAverageStars() {
@@ -524,6 +566,20 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
         }
         String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
         String publicId = "Report/" + originalFilename;
+        Map params = ObjectUtils.asMap(
+                "public_id", publicId,
+                "folder", "Hostel"
+        );
+        Map result = cloudinary.uploader().upload(file.getBytes(), params);
+        return result;
+    }
+    public Map uploadImageAvt(MultipartFile file) throws IOException {
+        // String publicId = "Hostel/" + UUID.randomUUID().toString() + System.currentTimeMillis();
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+        String publicId = "User/" + originalFilename;
         Map params = ObjectUtils.asMap(
                 "public_id", publicId,
                 "folder", "Hostel"

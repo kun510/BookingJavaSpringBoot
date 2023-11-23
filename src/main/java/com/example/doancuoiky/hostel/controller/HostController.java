@@ -82,13 +82,13 @@ public class HostController {
     }
 
     @PostMapping("/addBill")
-    public ResponseEntity<?> addBill(@Valid @ModelAttribute BillTotal addBill, @RequestParam("rentId") long rentId, @RequestParam("hostId") long hostId) {
+    public ResponseEntity<ResponseAll> addBill(@Valid @ModelAttribute BillTotal addBill, @RequestParam("rentId") long rentId, @RequestParam("hostId") long hostId) {
 
             TotalBill addBilliRent = ihostService.Bill(addBill, rentId,hostId);
             if (addBilliRent != null) {
-                return new ResponseEntity<>("Room added successfully", HttpStatus.OK);
+                return new ResponseEntity<>(new ResponseAll(true,"Room added successfully"),HttpStatus.OK);
             } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add room ccc");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseAll(false, "Failed to add bill room"));
             }
 
     }
@@ -135,6 +135,17 @@ public class HostController {
             return "No List Rent have id_host = "+ hostId;
         }
     }
+
+    @GetMapping("/getUserInRent")
+    public Object  getUserInRent(@RequestParam long hostId) {
+        List<Rent> rentList = ihostService.getUserInRent(hostId);
+        if (!rentList.isEmpty()) {
+            return rentList;
+        } else {
+            return "No List Rent have id_host = "+ hostId;
+        }
+    }
+
     @PutMapping("/addUserInRoom")
     public ResponseEntity<?> updateRentStatus(@RequestParam("roomId") long roomId) {
         String result = ihostService.AddUserInRoom(roomId);
@@ -145,8 +156,8 @@ public class HostController {
         }
     }
     @GetMapping("/usersByHost")
-    public ResponseEntity<List<Users>> getUsersByHost(@RequestParam long hostId) {
-        List<Users> users = ihostService.getAllUser(hostId);
+    public ResponseEntity<List<Rent>> getUsersByHost(@RequestParam long hostId) {
+        List<Rent> users = ihostService.getAllUser(hostId);
 
         if (!users.isEmpty()) {
             return ResponseEntity.ok(users);
@@ -154,6 +165,16 @@ public class HostController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("getBoaddingByHost")
+    public List<Boarding_host> getBoardingByHost(@RequestParam long hostId) {
+        return ihostService.getAllBoardingByUser(hostId);
+    }
+
+    @GetMapping("RoomEmptyByBoarding")
+    public List<ListandCoutRoom> RoomEmptyByBoarding(@RequestParam long hostId) {
+        return ihostService.RoomEmptyByBoarding(hostId);
+    }
+
     @GetMapping("/RoomByHost")
     public ResponseEntity<List<Room>> getRoomByHost(@RequestParam long hostId) {
         List<Room> roomsAndImages = ihostService.getAllRoomByHost(hostId);
@@ -163,6 +184,23 @@ public class HostController {
         } else {
             return ResponseEntity.ok(roomsAndImages);
         }
+    }
+
+    @GetMapping("/CountRoomEmpty")
+    public int getCountRoomEmpty(@RequestParam long BoardingId,@RequestParam long HostId){
+        return ihostService.countRoomEmpty( BoardingId,HostId);
+    }
+    @GetMapping("/CountRoomEmptyReal")
+    public int getCountRoomEmptyReal(@RequestParam long HostId){
+        return ihostService.countRoomEmptyReal(HostId);
+    }
+    @GetMapping("/CountRoom")
+    public int getCountRoom(@RequestParam long HostId){
+        return ihostService.contRoom(HostId);
+    }
+    @GetMapping("/CountRent")
+    public int getCountRent(@RequestParam long HostId){
+        return ihostService.contRent(HostId);
     }
 
     @PostMapping("/upload")

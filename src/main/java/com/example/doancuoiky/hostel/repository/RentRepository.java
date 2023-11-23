@@ -24,8 +24,8 @@ public interface RentRepository extends JpaRepository<Rent, Long> {
     @Modifying
     @Query("UPDATE Rent r SET r.status = 'Confirmed successfully' WHERE r.room.id = :roomId")
     void updateRentStatusByRoomId(@Param("roomId") long roomId);
-    @Query("SELECT DISTINCT r.user FROM Rent r WHERE r.room.user.id = :hostId")
-    List<Users> findUsersByHostId(@Param("hostId") Long hostId);
+    @Query("SELECT DISTINCT r FROM Rent r WHERE r.room.user.id = :hostId and r.status = 'Confirmed successfully'")
+    List<Rent> findUsersByHostId(@Param("hostId") Long hostId);
 
     @Query("SELECT DISTINCT r.user,r.room FROM Rent r WHERE r.room.id = :roomId and r.user.id = :userId")
     Optional<Rent> findUsersInRent(@Param("roomId") Long roomId, @Param("userId") Long userId);
@@ -40,6 +40,9 @@ public interface RentRepository extends JpaRepository<Rent, Long> {
     @Query("SELECT r.peopleInRoom FROM Rent r where r.room.id = :idRoom")
     int peopleInRoom(@Param("idRoom") long idRoom);
 
+    @Query("SELECT count(r.room.user.id) FROM Rent r where r.room.user.id = :idUser")
+    int peopleRent(@Param("idUser") long idUser);
+
     @Query("SELECT r.room.id FROM Rent r where r.id = :idRent")
     long idRoomByRent(@Param("idRent") long idRent);
 
@@ -49,6 +52,12 @@ public interface RentRepository extends JpaRepository<Rent, Long> {
     @Query("SELECT r.room.user FROM Rent r where r.room.id = :idRoom")
     Users idHostByRent(@Param("idRoom") long idRoom);
 
-    @Query("SELECT r FROM Rent r where r.user.id = :idUser")
+    @Query("SELECT r FROM Rent r where r.user.id = :idUser and r.status = 'Confirmed successfully'")
     List<Rent> MyRoomByIdUser(@Param("idUser") long idUser);
+
+    @Query("select r.user.token_device from Rent r  where r.room.user.id = :hostId ")
+    List<String> tokenUser(@Param("hostId") long hostId);
+
+    @Query("SELECT r FROM Rent r where r.room.user.id = :idHost and r.status = 'Confirmed successfully'")
+    List<Rent> getUserInRent(@Param("idHost") long idHost);
 }

@@ -18,7 +18,7 @@ public class HostelApplication {
 	@Bean
 	FirebaseMessaging firebaseMessaging() throws IOException{
 		GoogleCredentials googleCredentials = GoogleCredentials.fromStream(new ClassPathResource(
-				"hostelappdoancuoinam-firebase.json").getInputStream());
+				"hostelappdoancuoinam-firebase-adminsdk-okx2g-5b720483cb.json").getInputStream());
 		FirebaseOptions firebaseOptions = FirebaseOptions.builder().setCredentials(googleCredentials).build();
 		FirebaseApp app = FirebaseApp.initializeApp(firebaseOptions,"HostelAppDoanCuoiNam");
 		return FirebaseMessaging.getInstance(app);

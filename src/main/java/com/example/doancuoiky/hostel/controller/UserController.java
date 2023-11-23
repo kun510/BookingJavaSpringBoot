@@ -4,6 +4,7 @@ import com.example.doancuoiky.hostel.model.*;
 import com.example.doancuoiky.hostel.request.*;
 import com.example.doancuoiky.hostel.response.Response;
 import com.example.doancuoiky.hostel.response.ResponseAll;
+import com.example.doancuoiky.hostel.response.ResponseToken;
 import com.example.doancuoiky.hostel.service.IuserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,14 @@ public class UserController {
     public List<Users> getAlluser(){
         return iuserService.getAlluser();
     }
+    @GetMapping("/gettoken")
+    public List<String> gettoken(@RequestParam long hostId){
+        return iuserService.tokenUser(hostId);
+    }
+    @GetMapping("/getusercurrent")
+    public List<Users> getUserCurrent(@RequestParam long idUser){
+        return iuserService.getUserCurrent(idUser);
+    }
     @GetMapping("/getallroom")
     public List<Room> getAllRooms() {
         return iuserService.getAllRoom();
@@ -36,6 +45,24 @@ public class UserController {
     @GetMapping("/getAllRoomByBoarding")
     public List<Room> allRoomByBoarding(@RequestParam long boardingId) {
         return iuserService.allRoomByBoarding(boardingId);
+    }
+    @GetMapping("getCurrent")
+    public List<Users> userCurrent(@RequestParam long UserId) {
+        return iuserService.UserCurrent(UserId);
+    }
+    @GetMapping("/getToken")
+    public ResponseEntity<ResponseToken> getToken(@RequestParam long userId) {
+        try {
+            ResponseToken response = iuserService.getToken(userId);
+            if (response.isSuccess()) {
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            ResponseToken response = new ResponseToken(false, "Error: ", e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     @GetMapping("/getAllBoarding")
     public List<Boarding_host> getAllBoarding() {
@@ -103,11 +130,10 @@ public class UserController {
         }
     }
 
-
     //update
     @PutMapping("/update")
-    public Users updateuser(@RequestParam("id") long id, @RequestBody UpdateUsers user){
-        return iuserService.updateuser(id, user);
+    public Users updateuser(@RequestParam("id") long id, @Valid @ModelAttribute UpdateUsers user,@RequestParam("image1") MultipartFile imageFile1){
+        return iuserService.updateuser(id, user,imageFile1);
     }
     @GetMapping("/getRoomFavourite")
     public List<RoomFavourite> getAllRoomFavourite(@RequestParam("idUser") long idUser){
@@ -128,7 +154,7 @@ public class UserController {
     public ResponseEntity<?> sendNotification(@RequestBody NotificationMessaging notificationMessaging){
         ResponseAll responseAll =  iuserService.sendNotificationByToken(notificationMessaging);
         if (responseAll.isSuccess()){
-            return ResponseEntity.ok(iuserService.sendNotificationByToken(notificationMessaging));
+            return ResponseEntity.ok("ok");
         }
         else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + responseAll.getMessage());
@@ -223,14 +249,13 @@ public class UserController {
 
     @GetMapping("/search")
     public ResponseEntity<?> searchRooms(
-            @RequestParam(required = false) String address,
-            @RequestParam(required = false) String price,
+            @RequestParam(required = false) Integer price,
             @RequestParam(required = false) String area,
             @RequestParam(required = false) String people,
             @RequestParam(required = false) String type
     ) {
         try {
-            List<Room> rooms = iuserService.searchRooms( address,  price,  area, people, type);
+            List<Room> rooms = iuserService.searchRooms(price,  area, people, type);
             return ResponseEntity.ok(rooms);
         } catch (Exception e) {
             e.printStackTrace();

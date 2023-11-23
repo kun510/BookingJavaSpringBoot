@@ -1,7 +1,9 @@
 package com.example.doancuoiky.hostel.repository;
 
 
+import com.example.doancuoiky.hostel.model.Report;
 import com.example.doancuoiky.hostel.model.Users;
+import com.example.doancuoiky.hostel.response.ResponseAll;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,6 +34,17 @@ public interface UserRepository extends JpaRepository<Users,Long> {
 
     @Transactional
     @Modifying
+    @Query("UPDATE Users r SET r.confirmation_status = 'ban' WHERE r.id = :hostId")
+    void banUserStatusById(@Param("hostId") long hostId);
+
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Users r SET r.confirmation_status = 'cancel' WHERE r.id = :hostId")
+    void updateUserCancelStatusById(@Param("hostId") long hostId);
+
+    @Transactional
+    @Modifying
     @Query("UPDATE Users r SET r.token_device = :token where r.id = :userID")
     void addToken(@Param("token") String token ,@Param("userID") long userID);
 
@@ -40,5 +53,22 @@ public interface UserRepository extends JpaRepository<Users,Long> {
 
     @Query("SELECT u FROM Users u WHERE u.id= :id and u.role = '1'")
     Users checkAdmin(@Param("id") Long id);
+    @Query("SELECT u FROM Users u where u.role = '3' and u.id = :userID")
+    List<Users> getUserCurrent(@Param("userID") long userID);
+
+    @Query("select u.token_device from Users u where u.id = :userID")
+    String getToken(@Param("userID") long userID);
+
+    @Query("select count(u) from Users u where u.role = '3'")
+    int countUser();
+    @Query("select count(u) from Users u where u.role = '2'")
+    int countHost();
+
+    @Query("SELECT DISTINCT u FROM Users u WHERE u.confirmation_status = 'ban' ")
+    List<Users> listBan();
+
+    @Query("SELECT u FROM Users u where u.id = :userID")
+    List<Users> UserCurrent(@Param("userID") long userID);
+
 
 }

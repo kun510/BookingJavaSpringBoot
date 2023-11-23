@@ -26,4 +26,5 @@ public class TotalBill {
     @ManyToOne
     @JoinColumn(name = "rent_id")
     private Rent rent;
+
 }

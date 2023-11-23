@@ -1,5 +1,6 @@
 package com.example.doancuoiky.hostel.repository;
 
+import com.example.doancuoiky.hostel.model.ListandCoutRoom;
 import com.example.doancuoiky.hostel.model.Room;
 import com.example.doancuoiky.hostel.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,13 +21,13 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
 //    @Query("SELECT r FROM Room r WHERE r.address LIKE %:address%")
 //    List<Room> findByAddressContaining(@Param("address") String address);
 
-    @Query("SELECT r FROM Room r WHERE r.price = :price")
-    List<Room> findByPrice(@Param("price") String price);
+    @Query("SELECT r FROM Room r WHERE r.price <= :price")
+    List<Room> findByPrice(@Param("price") int price);
 
-//    @Query("SELECT r FROM Room r WHERE r.area = :area")
-//    List<Room> findByArea(@Param("area") String area);
+    @Query("SELECT r FROM Room r WHERE r.boardingHostel.area = :area")
+    List<Room> findByArea(@Param("area") String area);
 
-    @Query("SELECT r FROM Room r WHERE r.people = :people")
+    @Query("SELECT r FROM Room r WHERE r.people <= :people")
     List<Room> findByPeople(@Param("people") String people);
 
     @Query("SELECT r FROM Room r WHERE r.type = :type")
@@ -37,7 +38,7 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
     @Query("UPDATE Room r SET r.status = 'hired' WHERE r.id = :roomId")
     void updateRoomStatusById(@Param("roomId") long roomId);
 
-    @Query("SELECT r FROM Room r where r.status = 'still empty' and r.user.id = :hostId")
+    @Query("SELECT r FROM Room r where r.status = 'empty room' and r.user.id = :hostId")
     List<Room> allRoomsEmpty(@Param("hostId") long hostId);
 
     @Query("SELECT r FROM Room r where r.numberOfStars >= 4 ")
@@ -54,4 +55,18 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
 
     @Query("SELECT r.WaterBill FROM Room r where r.id = :idRoom")
     int priceWater(@Param("idRoom") long idRoom);
+
+    @Query("select count(r) from Room r")
+    int countRoom();
+
+    @Query("SELECT count(r) from Room r where r.boardingHostel.id = :BoardingId and r.user.id =:HostId and r.status ='empty room'")
+    int countRoomEmpty(@Param("BoardingId") long BoardingId,@Param("HostId") long HostId);
+
+    @Query("SELECT count(r) from Room r where r.user.id =:HostId and r.status ='empty room'")
+    int countRoomEmptyReal(@Param("HostId") long HostId);
+    @Query("SELECT count(r) from Room r where r.user.id =:HostId")
+    int countRoom(@Param("HostId") long HostId);
+    @Query("SELECT new com.example.doancuoiky.hostel.model.ListandCoutRoom(r.boardingHostel, COUNT(r.id))  FROM Room r WHERE r.user.id = :hostId AND r.status = 'empty room' GROUP BY r.boardingHostel.id")
+    List<ListandCoutRoom> getRoomCountsForHost(long hostId);
+
 }

@@ -75,28 +75,35 @@ public class HostServiceImplement implements IhostService {
         try {
             if (addRoom != null) {
                 Users host = getUserWithRole(hostId, 2);
-                Boarding_host boardingHostel = getBoardingIfExists(hostId,boardingId);
-                if (boardingRepository.existsByStatusAndId("confirm", boardingId)) {
-                    Room room = new Room();
-                    room.setDescription(addRoom.getDescription());
-                    room.setNumberRoom(addRoom.getNumberRoom());
-                    room.setStatus("empty room");
-                    room.setElectricBill(addRoom.getElectricBill());
-                    room.setWaterBill(addRoom.getWaterBill());
-                    room.setPrice(addRoom.getPrice());
-                    room.setPeople(addRoom.getPeople());
-                    room.setType(addRoom.getType());
-                    room.setUser(host);
-                    room.setBoardingHostel(boardingHostel);
-                    Map uploadResult = uploadImage(imageFile);
-                    room.setImg(uploadResult.get("secure_url").toString());
-                    roomRepository.save(room);
-                    boardingRepository.updateBoardingNumber(boardingId);
-                    response.setSuccess(true);
-                    response.setMessage("Room added successfully");
+                ResponseAll checkBan = checkBan(hostId);
+                if (checkBan.isSuccess()) {
+                    Boarding_host boardingHostel = getBoardingIfExists(hostId, boardingId);
+                    if (boardingRepository.existsByStatusAndId("confirm", boardingId)) {
+                        Room room = new Room();
+                        room.setDescription(addRoom.getDescription());
+                        room.setNumberRoom(addRoom.getNumberRoom());
+                        room.setStatus("empty room");
+                        room.setElectricBill(addRoom.getElectricBill());
+                        room.setWaterBill(addRoom.getWaterBill());
+                        room.setPrice(addRoom.getPrice());
+                        room.setPeople(addRoom.getPeople());
+                        room.setType(addRoom.getType());
+                        room.setUser(host);
+                        room.setBoardingHostel(boardingHostel);
+                        Map uploadResult = uploadImage(imageFile);
+                        room.setImg(uploadResult.get("secure_url").toString());
+                        roomRepository.save(room);
+                        boardingRepository.updateBoardingNumber(boardingId);
+                        response.setSuccess(true);
+                        response.setMessage("Room added successfully");
+                    } else {
+                        response.setMessage("Boarding_host status must be 'confirm' to add a room.");
+                    }
                 } else {
-                    response.setMessage("Boarding_host status must be 'confirm' to add a room.");
+                    response.setMessage(checkBan.getMessage());
                 }
+
+
             } else {
                 response.setMessage("User does not have the required role to add a room.");
             }
@@ -113,35 +120,40 @@ public class HostServiceImplement implements IhostService {
         try {
             if (addBoarding != null) {
                 Users host = getUserWithRole(hostId, 2);
-                Boarding_host room = new Boarding_host();
-                room.setArea(addBoarding.getArea());
-                room.setAddress(addBoarding.getAddress());
-                room.setStatus("Waiting Confirm");
-                room.setUser(host);
-                room.setNumberRoom(0);
-                Map uploadResult = uploadImage(imageFile);
-                room.setImg(uploadResult.get("secure_url").toString());
-                NotificationApp notification = new NotificationApp();
-                notification.setUser_id_sender(host);
-                notification.setContent("user: "+ host.getName()+", " + "add "+ "boarding hostel address: " + room.getAddress());
-                long checkAdmin = userRepository.checkAdmin();
-                if (checkAdmin == 0) {
-                    response.setMessage("Admin user not found.");
-                    return response;
-                }
-                Users adminId = userRepository.findById(checkAdmin).orElse(null);
-                if (adminId == null) {
-                    response.setMessage("Admin user not found.");
-                    return response;
-                }
+                ResponseAll checkBan = checkBan(hostId);
+                if (checkBan.isSuccess()) {
+                    Boarding_host room = new Boarding_host();
+                    room.setArea(addBoarding.getArea());
+                    room.setAddress(addBoarding.getAddress());
+                    room.setStatus("Waiting Confirm");
+                    room.setUser(host);
+                    room.setNumberRoom(0);
+                    Map uploadResult = uploadImage(imageFile);
+                    room.setImg(uploadResult.get("secure_url").toString());
+                    NotificationApp notification = new NotificationApp();
+                    notification.setUser_id_sender(host);
+                    notification.setContent("user: " + host.getName() + ", " + "add " + "boarding hostel address: " + room.getAddress());
+                    long checkAdmin = userRepository.checkAdmin();
+                    if (checkAdmin == 0) {
+                        response.setMessage("Admin user not found.");
+                        return response;
+                    }
+                    Users adminId = userRepository.findById(checkAdmin).orElse(null);
+                    if (adminId == null) {
+                        response.setMessage("Admin user not found.");
+                        return response;
+                    }
 
-                notification.setUser_id_receiver(adminId);
-                Date currentTime = new Date();
-                notification.setTime(new Date(currentTime.getTime()));
-                notificationRepository.save(notification);
-                boardingRepository.save(room);
-                response.setSuccess(true);
-                response.setMessage("Boarding added successfully");
+                    notification.setUser_id_receiver(adminId);
+                    Date currentTime = new Date();
+                    notification.setTime(new Date(currentTime.getTime()));
+                    notificationRepository.save(notification);
+                    boardingRepository.save(room);
+                    response.setSuccess(true);
+                    response.setMessage("Boarding added successfully");
+                } else {
+                    response.setMessage(checkBan.getMessage());
+                }
             } else {
                 response.setMessage("Input data (addBoarding) is null.");
             }
@@ -153,7 +165,7 @@ public class HostServiceImplement implements IhostService {
 
 
     @Override
-    public TotalBill Bill(BillTotal totalBill, long idRent,long hostId) {
+    public TotalBill Bill(BillTotal totalBill, long idRent, long hostId) {
         if (totalBill != null) {
             Optional<Rent> rentOptional = rentRepository.findById(idRent);
             Users host = getUserWithRole(hostId, 2);
@@ -185,8 +197,8 @@ public class HostServiceImplement implements IhostService {
                 try {
                     NotificationApp notification = new NotificationApp();
                     notification.setUser_id_sender(host);
-                    notification.setContent("host: "+ host.getName()+", " + "added bill room: " + rent.getRoom().getNumberRoom()
-                    + " month: " + Bill.getMonth());
+                    notification.setContent("host: " + host.getName() + ", " + "added bill room: " + rent.getRoom().getNumberRoom()
+                            + " month: " + Bill.getMonth());
                     long checkUserRent = rent.getUser().getId();
                     if (checkUserRent == 0) {
                         return null;
@@ -281,7 +293,7 @@ public class HostServiceImplement implements IhostService {
     }
 
     @Override
-    public List<Users> getAllUser(long hostId) {
+    public List<Rent> getAllUser(long hostId) {
         return rentRepository.findUsersByHostId(hostId);
     }
 
@@ -297,8 +309,43 @@ public class HostServiceImplement implements IhostService {
     }
 
     @Override
+    public List<ListandCoutRoom>  RoomEmptyByBoarding( long HostId) {
+        return roomRepository.getRoomCountsForHost(HostId);
+    }
+
+    @Override
     public List<Boarding_host> getAllBoardingHostelConfirm(long hostId) {
         return boardingRepository.allRoomsOk(hostId);
+    }
+
+    @Override
+    public List<Boarding_host> getAllBoardingByUser(long hostId) {
+        return boardingRepository.allBoardingByHost(hostId);
+    }
+
+    @Override
+    public int countRoomEmpty(long BoardingId, long HostId) {
+        Boarding_host boardingHostel = getBoardingIfExists(BoardingId, HostId);
+        return roomRepository.countRoomEmpty(BoardingId, HostId);
+
+    }
+
+    @Override
+    public int countRoomEmptyReal(long HostId) {
+        return roomRepository.countRoomEmptyReal(HostId);
+    }
+    @Override
+    public int contRoom(long HostId) {
+        return roomRepository.countRoom(HostId);
+    }
+    @Override
+    public int contRent(long HostId) {
+        return rentRepository.peopleRent(HostId);
+    }
+
+    @Override
+    public List<Rent> getUserInRent(long HostId) {
+        return rentRepository.getUserInRent(HostId);
     }
 
     public Map uploadImage(MultipartFile file) throws IOException {
@@ -342,6 +389,7 @@ public class HostServiceImplement implements IhostService {
             throw new RuntimeException("Error uploading images.", e);
         }
     }
+
     private void setImgUrl(ImgRoom imgRoom, int index, String imageUrl) {
         switch (index) {
             case 1:
@@ -366,13 +414,20 @@ public class HostServiceImplement implements IhostService {
 
     private Users getUserWithRole(long userId, int roleId) {
         Optional<Users> usersOptional = userRepository.findById(userId);
-        if (!usersOptional.isPresent() || usersOptional.get().getRole().getId() != roleId  ) {
+        if (!usersOptional.isPresent() || usersOptional.get().getRole().getId() != roleId) {
             throw new RuntimeException("Người dùng không có vai trò cần thiết để thêm phòng.");
-        }
-        else if(!usersOptional.get().getConfirmation_status().equals("confirm")){
+        } else if (!usersOptional.get().getConfirmation_status().equals("confirm") && !usersOptional.get().getConfirmation_status().equals("ban")) {
             throw new RuntimeException("Người dùng chưa được xác nhận.");
         }
         return usersOptional.get();
+    }
+
+    private ResponseAll checkBan(long userId) {
+        Optional<Users> usersOptional = userRepository.findById(userId);
+        if (usersOptional.get().getConfirmation_status().equals("ban")) {
+            return new ResponseAll(false, "Your account has been locked for 30 days");
+        }
+        return new ResponseAll(true, "OK");
     }
 
     private Room getRoomIfExists(long roomId) {
@@ -382,21 +437,19 @@ public class HostServiceImplement implements IhostService {
         }
         return roomOptional.get();
     }
-    private Boarding_host getBoardingIfExists(long boardingId ,long userId) {
-        Optional<Boarding_host> boardingHost = boardingRepository.findIdAndHost(userId,boardingId);
+
+    private Boarding_host getBoardingIfExists(long boardingId, long userId) {
+        Optional<Boarding_host> boardingHost = boardingRepository.findIdAndHost(userId, boardingId);
         if (!boardingHost.isPresent()) {
             throw new RuntimeException("Boarding Host Not Found");
         }
         return boardingHost.get();
     }
+
     private List<Map> uploadListImages(List<MultipartFile> files) throws IOException {
         List<Map> uploadResults = new ArrayList<>();
 
         if (files == null) {
-            // Xử lý trường hợp danh sách file là null (tùy thuộc vào logic của bạn)
-            // ...
-
-            // Trong trường hợp bạn muốn chấp nhận giá trị null và tiếp tục xử lý, hãy return ngay đây
             return uploadResults;
         }
 
@@ -423,8 +476,6 @@ public class HostServiceImplement implements IhostService {
 
         return uploadResults;
     }
-
-
 
 
     private boolean isValidImageFormat(String contentType) {
