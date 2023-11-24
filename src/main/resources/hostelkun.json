@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "hostelkun-rafc",
+  "private_key_id": "9115ff3f51bc3037f6b7b5c725525cc027a46d9e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDIooxOQQg3Wl2S\n/QY9szI5ehx8ZgxnI1JXJXI+N8hxhFasUfUQkmppn6TPJ5PkDvAfZB7UXHEXo0Jn\naH/U+zGx+RV0HGkAkeVDrs741HkIL71Sgmqwskb2nrjXZDD/1jFPUDMz6x5WT71I\nMelb6OY1G+8vcdfwXZXR8L2+cTT8FfziitJUiMe/pDIjChd7tRrU9usnxnLda633\n73A3nsqeSYtlnZGXTltANPPX6pdcpOGAUNyEQ9l2alZkWpu8Pj/56iBlGoh/gTTj\naTSmR3413qaGhmNI2SsibElKvGnOPJlfYhURCdT5J5Jjl81fxLMler6E0tj6K1U7\ndac6TTTfAgMBAAECggEAGmvhizqgMN3rHbzJch2jmxMcJjuwHXL22Hgbc9sXv+88\nFMRUQALwFYnLA+bD4JAhChk+wBuOXx0GVSTbVLphwHy7WQeWwlb0OLYQFo+wgqX6\nyh9Xmn5XvwmG8QKGO2LDKp02qPspCxfEJvo/r3Vbv5m2pWpaFBLW9Ic+DZLN9fZZ\nkQSynZc+IP6f94d5NQhig2u6iFMjXqxy4e4eyhV97+EzeqWg/J6VkKe7nRvCEuuO\noP+Aeuu0U1+7Gu1mKKBEGVcNFqwQt/+O5yYgJszou5xq/6sXMgKpleSAF0yEZsLY\n3Zow4jSOkih+/gkU1Nf7s3dpmupDvnlDgZnDry73jQKBgQDsb5bqJjUvqTB7cW3i\niNut/wbCmo9oSPAd7ODMyQyE+zxD38FJapsO01eqCHdWU1ptwsqLxtbgfcwPRbC5\nYM1we07iFoIWBFuEHXNQTjTFrvEnQrg4x2GqZgym0Yaevq8vUzywHX9vMICH2147\nkk40LZ3OjdEfY9mawnVXmHj/ewKBgQDZPJa/qyoPeKBi2VCbB/OGy8G9Bj8pux+E\n4QLIJdD+AaQDJB7EEQIx03FD6Yq9uygWQhTUCstOVjc/Is0map15phyxCLEdVWxo\ngomSRVMlbm/jnBPYwOsnMt8nNAFBY9haJmU+JDA+70kcdkbr52SnHhgkHb/eu2li\neAOrVaMQ7QKBgQCAGAzZGo4iHjWoC1IPMzphUBOnhvk+9JUygU1hZWMlAMArvaQI\nVHthUtrhweh1mn8ZjDkT9UwhH8ZYV9dg97MVx5h7INqldwLl1tbMoTIyD4+TR7Br\nAopFOTiNgGLAymo654uvlqud39ciw5SQDbnUxwoCCA9ORFh2YfgU1wRm1QKBgQCB\nD9YgGXjrqCbhk2qoMJkmRHfd7ZApItse/u/AKXd48VCX7SW6JsC/CXgJeP7Mqhyu\n3KOzNpaC/AXmpK5tXHoig+YX56oSW2YE0UkadcVoP6yJ9Xh1Fmie6UJa8DKuvrsT\nFCyiNq3TNiahmkOYc+kAwIhnLKWJlp6Nue+0IzS2IQKBgQCyZ43/92g5+5oVdgr8\nhHXqjzZT+cZwNSO8C4FM1++p0Ra/J9potinGwFRDmnSUGq6W/oCMxvYJNEfnCMTj\niMKYaH+iJpf3qSTPITPymXqUlYoUwhzwwXxLrrQxn3B6V+OUTD/+Jo8pW6lA/pg3\nB3ACJajmcxDfU8O7yrVffP8ltw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "hostelkun@hostelkun-rafc.iam.gserviceaccount.com",
+  "client_id": "114992958390643034690",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/hostelkun%40hostelkun-rafc.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

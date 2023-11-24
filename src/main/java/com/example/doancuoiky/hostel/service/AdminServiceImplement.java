@@ -6,17 +6,37 @@ import com.example.doancuoiky.hostel.model.Report;
 import com.example.doancuoiky.hostel.model.Users;
 import com.example.doancuoiky.hostel.repository.*;
 import com.example.doancuoiky.hostel.response.ResponseAll;
+import com.example.doancuoiky.hostel.response.ResponseOtp;
+import com.google.api.gax.core.FixedCredentialsProvider;
+import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.dialogflow.v2.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
+import javax.mail.internet.MimeMessage;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class AdminServiceImplement implements IadminService{
 
+    @Value("${dialogflow.project-id}")
+    private String projectId;
+
+    @Value("${dialogflow.credentials-file}")
+    private String credentialsFilePath;
+
+    @Value("${spring.mail.username}")
+    private String fromEmail;
     @Autowired
     private BoardingRepository boardingRepository;
     @Autowired
@@ -27,6 +47,8 @@ public class AdminServiceImplement implements IadminService{
     private RoomRepository roomRepository;
     @Autowired
     private ReportRepository reportRepository;
+    @Autowired
+    private JavaMailSender mailSender;
     @Override
     public List<Users> user() {
         return userRepository.allUsers();
@@ -188,4 +210,39 @@ public class AdminServiceImplement implements IadminService{
         }
         return new ResponseAll (false,"you don't Admin");
     }
+
+    @Override
+    public ResponseOtp sendMailChangePassword(String to) {
+        try {
+            String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+
+            Random random = new Random();
+            StringBuilder randomString = new StringBuilder();
+            for (int i = 0; i < 3; i++) {
+                int randomIndex = random.nextInt(CHARACTERS.length() - 10);
+                randomString.append(CHARACTERS.charAt(randomIndex));
+            }
+            for (int i = 0; i < 3; i++) {
+                int randomIndex = random.nextInt(10) + 52;
+                randomString.append(CHARACTERS.charAt(randomIndex));
+            }
+            String bodyWithRandomString = "Mã của bạn là: <strong>" + randomString + "</strong>" +
+                    " Hãy điền đúng vào ứng dụng để thay đổi mật khẩu";
+            String title = "Mã xác thực yêu cầu thay đổi mật khẩu";
+            mimeMessageHelper.setFrom(fromEmail);
+            mimeMessageHelper.setTo(to);
+            mimeMessageHelper.setSubject(title);
+            mimeMessageHelper.setText(bodyWithRandomString, true);
+
+            mailSender.send(mimeMessage);
+            return new ResponseOtp(true,randomString.toString());
+
+        } catch (Exception e) {
+            return new ResponseOtp(false,"lỗi sendMail");
+        }
+    }
+
+
 }

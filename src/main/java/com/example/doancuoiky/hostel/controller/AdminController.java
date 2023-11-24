@@ -5,11 +5,15 @@ import com.example.doancuoiky.hostel.model.Boarding_host;
 import com.example.doancuoiky.hostel.model.Report;
 import com.example.doancuoiky.hostel.model.Users;
 import com.example.doancuoiky.hostel.response.ResponseAll;
+import com.example.doancuoiky.hostel.response.ResponseOtp;
 import com.example.doancuoiky.hostel.service.IadminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -135,4 +139,15 @@ public class AdminController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+    @PostMapping("/sendMail")
+    public ResponseOtp sendMailChangePassword(@RequestParam("sendTo")  String to) {
+        ResponseOtp responseOtp = iadminService.sendMailChangePassword(to);
+        if (responseOtp.isSuccess()){
+            return responseOtp;
+        }
+        return new ResponseOtp(false,"fail Send Mail");
+    }
+
+
 }

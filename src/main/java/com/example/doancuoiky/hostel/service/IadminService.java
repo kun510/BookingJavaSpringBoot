@@ -7,7 +7,10 @@ import com.example.doancuoiky.hostel.model.Users;
 import com.example.doancuoiky.hostel.request.AddBoarding;
 import com.example.doancuoiky.hostel.request.AddRoom;
 import com.example.doancuoiky.hostel.response.ResponseAll;
+import com.example.doancuoiky.hostel.response.ResponseOtp;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface IadminService {
@@ -29,4 +32,6 @@ public interface IadminService {
     List<Users> ListBan();
     ResponseAll UpdateCancelBoardingStatus(long AdminId,long boardingId);
     ResponseAll UpdateCancelHostStatus(long AdminId,long UserId);
+    ResponseOtp sendMailChangePassword(String to);
+
 }
