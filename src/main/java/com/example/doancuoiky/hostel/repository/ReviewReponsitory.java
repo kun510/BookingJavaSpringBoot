@@ -12,9 +12,9 @@ import java.util.List;
 @Repository
 public interface ReviewReponsitory extends JpaRepository<Review, Long> {
     boolean existsByUserAndRoom(Users user, Room room);
-    boolean existsByUserAndBoarding(Users user, Boarding_host Boarding);
+
     List<Review> findByRoom(Room room);
-    List<Review> findByBoarding(Boarding_host boardingHost);
+
 //    @Modifying
 //    @Transactional
 //    @Query("UPDATE Review r SET r.numberOfStars = :numberOfStars WHERE r.id = :reviewId")

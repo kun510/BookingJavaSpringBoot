@@ -1,16 +1,14 @@
 package com.example.doancuoiky.hostel.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Date;
-
 @Entity
 @Data
-@Table(name = "Review")
-public class Review {
+@Table(name = "Review_boarding")
+public class ReviewBoarding {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -28,8 +26,8 @@ public class Review {
     private Users user;
 
     @ManyToOne()
-    @JoinColumn(name = "room_id")
-    private Room room;
+    @JoinColumn(name = "boarding_id")
+    private Boarding_host boarding;
 
     @Column(name = "day")
     private Date date;

@@ -207,8 +207,8 @@ public class HostController {
         }
     }
     @GetMapping("/AllRoomByHost")
-    public ResponseEntity<List<Room>> getAllRoomByHost(@RequestParam long hostId) {
-        List<Room> rooms = ihostService.AllRoom(hostId);
+    public ResponseEntity<List<Room>> getAllRoomByHost(@RequestParam long hostId,@RequestParam long boardingId) {
+        List<Room> rooms = ihostService.AllRoom(hostId,boardingId);
         if (rooms.isEmpty()) {
             return ResponseEntity.notFound().build();
         } else {

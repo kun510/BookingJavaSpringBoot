@@ -4,7 +4,6 @@ import com.example.doancuoiky.hostel.model.*;
 import com.example.doancuoiky.hostel.request.*;
 import com.example.doancuoiky.hostel.response.ResponseAll;
 import com.example.doancuoiky.hostel.response.ResponseToken;
-import org.springframework.data.repository.query.Param;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -47,7 +46,7 @@ public interface IuserService {
 
     Review Review(ReviewRq reviewRq,long idRoom,long idUser);
 
-    Review ReviewBoarding(ReviewRq reviewRq,long idBoarding,long idUser);
+    ReviewBoarding ReviewBoarding(ReviewRq reviewRq, long idBoarding, long idUser);
     List<Room> searchRooms(Integer  price, String area,String people,String type);
 
     List<TotalBill> getAllBill(long idUser);

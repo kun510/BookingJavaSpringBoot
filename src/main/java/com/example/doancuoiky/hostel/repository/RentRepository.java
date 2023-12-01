@@ -26,6 +26,10 @@ public interface RentRepository extends JpaRepository<Rent, Long> {
     void updateRentStatusByRoomId(@Param("roomId") long roomId);
     @Transactional
     @Modifying
+    @Query("DELETE FROM Rent r WHERE r.status = 'wait for confirmation' and r.room.id = :roomId")
+    void deleteByRoom(@Param("roomId") long roomId);
+    @Transactional
+    @Modifying
     @Query("UPDATE Rent r SET r.status = 'Confirmed successfully' WHERE r.id = :rentId")
     Integer updateRentStatusByRoomIdMobile(@Param("rentId") long rentId);
 
@@ -38,7 +42,7 @@ public interface RentRepository extends JpaRepository<Rent, Long> {
     List<Rent> findUsersByHostId(@Param("hostId") Long hostId);
 
     @Query("SELECT DISTINCT r.user,r.room FROM Rent r WHERE r.room.id = :roomId and r.user.id = :userId")
-    Optional<Rent> findUsersInRent(@Param("roomId") Long roomId, @Param("userId") Long userId);
+    Rent findUsersInRent(@Param("roomId") Long roomId, @Param("userId") Long userId);
     @Query("SELECT r.room.boardingHostel.id FROM Rent r WHERE r.room.id = :roomId")
     int findBoardingIdByRoomId(@Param("roomId") Long roomId);
     @Query("SELECT r FROM Rent r WHERE r.status = 'Confirmed successfully' and r.user.id = :userId AND r.room.id = :roomId")

@@ -41,12 +41,12 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
     @Query("SELECT r FROM Room r where r.status = 'empty room' and r.user.id = :hostId")
     List<Room> allRoomsEmpty(@Param("hostId") long hostId);
 
-    @Query("SELECT r FROM Room r where r.user.id = :hostId")
-    List<Room> allRoomsNe(@Param("hostId") long hostId);
+    @Query("SELECT r FROM Room r where r.user.id = :hostId and r.boardingHostel.id = :boardingId")
+    List<Room> allRoomsNe(@Param("hostId") long hostId,@Param("boardingId") long boardingId);
     @Query("SELECT r FROM Room r where r.numberOfStars >= 4 ")
     List<Room> allRoomsHot();
 
-    @Query("SELECT r FROM Room r where r.status = 'empty room' and r.boardingHostel.id = :boardingId and r.boardingHostel.status = 'confirm'")
+    @Query("SELECT r FROM Room r where r.status = 'empty room' and r.boardingHostel.id = :boardingId and r.boardingHostel.user.confirmation_status = 'confirm' and r.boardingHostel.status = 'confirm'")
     List<Room> allRoomByBoarding(@Param("boardingId") long boardingId);
 
     @Query("SELECT r.user FROM Room r where r.id = :idRoom ")

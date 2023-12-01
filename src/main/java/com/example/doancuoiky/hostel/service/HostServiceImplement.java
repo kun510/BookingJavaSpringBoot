@@ -294,6 +294,7 @@ public class HostServiceImplement implements IhostService {
             Integer checkUpdateRoom =  roomRepository.updateRoomStatusById(roomId);
            if (checkUpdateRent > 0 && checkUpdateRoom > 0){
                Rent updatedRent = updatedRentOptional.get();
+               rentRepository.deleteByRoom(roomId);
                NotificationApp notificationApp = new NotificationApp();
                notificationApp.setUser_id_sender(rentRepository.idHostByRent(roomId));
                notificationApp.setUser_id_receiver(rentRepository.idUserByRent(roomId));
@@ -356,8 +357,8 @@ public class HostServiceImplement implements IhostService {
         return emptyRooms;
     }
     @Override
-    public List<Room> AllRoom(long hostId) {
-        return roomRepository.allRoomsNe(hostId);
+    public List<Room> AllRoom(long hostId,long boardingId) {
+        return roomRepository.allRoomsNe(hostId,boardingId);
     }
 
     @Override

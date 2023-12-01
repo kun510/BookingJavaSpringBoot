@@ -11,5 +11,5 @@ import java.util.Date;
 @Data
 public class ReviewRq {
     private String evaluate;
-    private int numberOfStars;
+    private float numberOfStars;
 }

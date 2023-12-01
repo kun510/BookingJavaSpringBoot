@@ -8,13 +8,11 @@ import com.example.doancuoiky.hostel.repository.*;
 import com.example.doancuoiky.hostel.request.*;
 import com.example.doancuoiky.hostel.response.ResponseAll;
 import com.example.doancuoiky.hostel.response.ResponseToken;
-import com.google.api.client.util.DateTime;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,9 +24,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -51,6 +47,8 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
     private ReportRepository reportRepository;
     @Autowired
     private ReviewReponsitory reviewReponsitory;
+    @Autowired
+    private ReviewBoardingReponsitory reviewBoardingReponsitory;
     @Autowired
     private Cloudinary cloudinary;
     @Autowired
@@ -263,7 +261,7 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
             Optional<Room> roomOptional = roomRepository.findById(idRoom);
             if (roomOptional.isPresent()) {
                 Room room = roomOptional.get();
-                Rent existingRent = rentRepository.findByUser(user);
+               Rent existingRent = rentRepository.findUsersInRent(idRoom,idUser);
                 if (existingRent == null) {
                     int usersInRoom = roomRepository.numberUserInRoom(idRoom);
                     if (numberUserInRoom <= usersInRoom){
@@ -398,7 +396,7 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
     }
 
     @Override
-    public Review ReviewBoarding(ReviewRq reviewRq, long idBoarding, long idUser) {
+    public ReviewBoarding ReviewBoarding(ReviewRq reviewRq, long idBoarding, long idUser) {
         Optional<Users> usersOptional = userRepository.findById(idUser);
         if (usersOptional.isPresent()) {
             Users user = usersOptional.get();
@@ -406,20 +404,20 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
             Optional<Boarding_host> roomOptional = boardingRepository.findById(idBoarding);
             if (roomOptional.isPresent()) {
                 Boarding_host room = roomOptional.get();
-                boolean hasReviewed = reviewReponsitory.existsByUserAndBoarding(user, room);
+                boolean hasReviewed = reviewBoardingReponsitory.existsByUserAndBoarding(user, room);
                 if (hasReviewed) {
                     throw new IllegalArgumentException("User has already reviewed a room");
                 } else {
                     List<Rent> checkUserBelongsTo = rentRepository.checkUserBelongsTo(idUser,idBoarding);
                     if (checkUserBelongsTo != null && !checkUserBelongsTo.isEmpty()){
                         Date currentTime = new Date();
-                        Review review = new Review();
+                        ReviewBoarding review = new ReviewBoarding();
                         review.setUser(user);
                         review.setBoarding(room);
                         review.setEvaluate(reviewRq.getEvaluate());
                         review.setNumberOfStars(reviewRq.getNumberOfStars());
                         review.setDate(new Date(currentTime.getTime()));
-                        return reviewReponsitory.save(review);
+                        return reviewBoardingReponsitory.save(review);
                     }else {
                         throw new IllegalArgumentException("User not Rent in Room");
                     }
@@ -558,7 +556,7 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
     public void updateBoardingAverageStars() {
         List<Boarding_host> rooms = boardingRepository.allBoarding();
         for (Boarding_host boardingHost : rooms) {
-            List<Review> reviews = reviewReponsitory.findByBoarding(boardingHost);
+            List<Review> reviews = reviewBoardingReponsitory.findByBoarding(boardingHost);
             if (!reviews.isEmpty()) {
                 double totalStars = 0;
                 for (Review review : reviews) {

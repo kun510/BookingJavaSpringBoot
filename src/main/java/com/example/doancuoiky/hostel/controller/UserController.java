@@ -252,7 +252,7 @@ public class UserController {
     @PostMapping("/ReviewBoarding")
     public ResponseEntity<?> ReviewBoarding(@RequestBody ReviewRq reviewRq,@RequestParam long idBoarding,@RequestParam long idUser){
         try {
-            Review review = iuserService.ReviewBoarding(reviewRq,idBoarding,idUser);
+            ReviewBoarding review = iuserService.ReviewBoarding(reviewRq,idBoarding,idUser);
             if (review != null){
                 return ResponseEntity.ok("Thanks for review");
             }else {
