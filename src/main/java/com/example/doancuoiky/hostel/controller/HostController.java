@@ -155,6 +155,15 @@ public class HostController {
             return ResponseEntity.badRequest().body("Status update failed");
         }
     }
+    @PutMapping("/rentOver")
+    public ResponseEntity<ResponseAll> endRent(@RequestParam long roomId, @RequestParam long rentId) {
+        ResponseAll response = ihostService.RentOver(roomId,rentId);
+        if (response.isSuccess()) {
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @PutMapping("/addUserInRoomMobile")
     public ResponseEntity<ResponseAll> updateRentStatusMobile(@RequestParam("roomId") long roomId,@RequestParam("rentId") long rentId) {

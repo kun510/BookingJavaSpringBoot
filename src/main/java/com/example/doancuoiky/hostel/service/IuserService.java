@@ -30,6 +30,7 @@ public interface IuserService {
     List<Users> getUserCurrent(long idUser);
      //lay danh sach tro
     List<Room> getAllRoom();
+    List<Boarding_host> allBoardingMap();
     List<Room> getAllRoomHot();
     List<Rent> getMyRoom(long idUser);
      //lay hoa don
@@ -67,6 +68,7 @@ public interface IuserService {
     ResponseToken getToken(long idUser);
 
     List<Users> UserCurrent(long UserId);
+    List<Review> ReviewByRoom (long roomId);
 
     List<String> tokenUser(long hostId);
 

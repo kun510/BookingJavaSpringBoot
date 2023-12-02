@@ -22,6 +22,7 @@ public interface IhostService {
     String AddUserInRoom(long roomId);
     String AddUserInRoomMobile(long roomId,long rentId);
     String CancelUserInRoomMobile(long roomId,long rentId);
+    ResponseAll RentOver(long roomId,long rent);
     List<Rent> getAllRentConfirm(long hostId);
     List<Rent> getAllUser(long hostId);
     List<Room> getAllRoomByHost(long hostId);

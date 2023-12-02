@@ -203,6 +203,11 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
     }
 
     @Override
+    public List<Boarding_host> allBoardingMap() {
+        return boardingRepository.allBoardingMap();
+    }
+
+    @Override
     public List<Room> getAllRoomHot() {
         return roomRepository.allRoomsHot();
     }
@@ -530,6 +535,11 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
     }
 
     @Override
+    public List<Review> ReviewByRoom(long roomId) {
+        return reviewReponsitory.allReviewByRoom(roomId);
+    }
+
+    @Override
     public List<String> tokenUser(long hostId) {
         return rentRepository.tokenUser(hostId);
     }
@@ -556,14 +566,14 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
     public void updateBoardingAverageStars() {
         List<Boarding_host> rooms = boardingRepository.allBoarding();
         for (Boarding_host boardingHost : rooms) {
-            List<Review> reviews = reviewBoardingReponsitory.findByBoarding(boardingHost);
+            List<Review> reviews = reviewReponsitory.allRoomByBoarding(boardingHost);
             if (!reviews.isEmpty()) {
                 double totalStars = 0;
                 for (Review review : reviews) {
                     totalStars += review.getNumberOfStars();
                 }
                 double averageStars = totalStars / reviews.size();
-                boardingHost.setNumberOfStars((int) averageStars);
+                boardingHost.setNumberOfStars((float) averageStars);
                 boardingRepository.save(boardingHost);
             }
         }

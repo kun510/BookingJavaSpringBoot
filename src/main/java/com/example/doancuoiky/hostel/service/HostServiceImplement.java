@@ -335,6 +335,30 @@ public class HostServiceImplement implements IhostService {
         }
     }
 
+    @Override
+    public ResponseAll RentOver(long roomId,long rent) {
+        Optional<Rent> RentOptional = rentRepository.findById(rent);
+        if (RentOptional.isPresent()){
+            Integer RentEnd = rentRepository.cancelRentStatusByRoomIdMobile(rent);
+            Integer NextEmptyStatusRoom =  roomRepository.updateRentOver(roomId);
+            if (RentEnd > 0 && NextEmptyStatusRoom > 0){
+                Rent updatedRent = RentOptional.get();
+                NotificationApp notificationApp = new NotificationApp();
+                notificationApp.setUser_id_sender(rentRepository.idHostByRent(roomId));
+                notificationApp.setUser_id_receiver(rentRepository.idUserByRent(roomId));
+                notificationApp.setContent("You have ended the lease room " + updatedRent.getId());
+                Date currentTime = new Date();
+                notificationApp.setTime(new Date(currentTime.getTime()));
+                notificationRepository.save(notificationApp);
+                return new ResponseAll(true,"Over Rent successfully");
+            }else {
+                return new ResponseAll(false,"Fail Update");
+            }
+        }else {
+            return new ResponseAll(false,"Id Rent Not found");
+        }
+    }
+
 
     @Override
     public List<Rent> getAllRentConfirm(long hostId) {

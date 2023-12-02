@@ -14,7 +14,7 @@ import java.util.List;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room,Long> {
-    @Query("SELECT r FROM Room r where r.status != 'hired'")
+    @Query("SELECT r FROM Room r where r.status != 'hired' and r.user.confirmation_status != 'ban'")
     List<Room> allRooms();
 
     Room findRoomById(long id);
@@ -37,6 +37,10 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
     @Modifying
     @Query("UPDATE Room r SET r.status = 'hired' WHERE r.id = :roomId")
     Integer updateRoomStatusById(@Param("roomId") long roomId);
+    @Transactional
+    @Modifying
+    @Query("UPDATE Room r SET r.status = 'empty room' WHERE r.id = :roomId")
+    Integer updateRentOver(@Param("roomId") long roomId);
 
     @Query("SELECT r FROM Room r where r.status = 'empty room' and r.user.id = :hostId")
     List<Room> allRoomsEmpty(@Param("hostId") long hostId);

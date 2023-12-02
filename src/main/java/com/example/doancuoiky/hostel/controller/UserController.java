@@ -34,9 +34,17 @@ public class UserController {
     public List<Users> getUserCurrent(@RequestParam long idUser){
         return iuserService.getUserCurrent(idUser);
     }
+    @GetMapping("/getReview")
+    public List<Review> ReviewByRoom(@RequestParam long roomId){
+        return iuserService.ReviewByRoom(roomId);
+    }
     @GetMapping("/getallroom")
     public List<Room> getAllRooms() {
         return iuserService.getAllRoom();
+    }
+    @GetMapping("/allBoardingMap")
+    public List<Boarding_host> allBoardingMap() {
+        return iuserService.allBoardingMap();
     }
     @GetMapping("/getallroomhot")
     public List<Room> getAllRoomsHot() {
@@ -288,5 +296,6 @@ public class UserController {
             return ResponseEntity.ok(totalBills);
         }
     }
+
 
 }
