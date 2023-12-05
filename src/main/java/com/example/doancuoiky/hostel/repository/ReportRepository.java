@@ -25,6 +25,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     @Modifying
     @Query("UPDATE Report r SET r.times_report = r.times_report + 1 WHERE r.room.id = :roomId")
     void updateNumberReport(@Param("roomId") long roomId);
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Report r WHERE r.room.user.id = :hostId")
+    void deleteReportByHostId(@Param("hostId") long hostId);
     @Query("SELECT DISTINCT count (r.room) FROM Report r WHERE r.room.id = :roomId ")
     int checkRoom(@Param("roomId") Long roomId);
 

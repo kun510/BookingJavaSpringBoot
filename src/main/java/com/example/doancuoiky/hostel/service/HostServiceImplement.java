@@ -4,12 +4,11 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.doancuoiky.hostel.model.*;
 import com.example.doancuoiky.hostel.repository.*;
-import com.example.doancuoiky.hostel.request.AddBoarding;
-import com.example.doancuoiky.hostel.request.AddRoom;
-import com.example.doancuoiky.hostel.request.BillTotal;
-import com.example.doancuoiky.hostel.request.RegisterRq;
+import com.example.doancuoiky.hostel.request.*;
 import com.example.doancuoiky.hostel.response.ResponseAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -37,6 +36,8 @@ public class HostServiceImplement implements IhostService {
     private ListImgRepository listImgRepository;
     @Autowired
     private NotificationRepository notificationRepository;
+    @Autowired
+    private HelpRepository helpRepository;
     @Autowired
     private Cloudinary cloudinary;
 
@@ -421,6 +422,27 @@ public class HostServiceImplement implements IhostService {
     }
 
     @Override
+    public ResponseAll Help(HelpRq helpRq,long idHost) {
+        try {
+            Users users = userRepository.idHostByHelp(idHost);
+            if (users == null) {
+                return new ResponseAll(false, "No User found for idHost: " + idHost);
+            }
+            Help help = new Help();
+            help.setContentHelp(helpRq.getContentHelp());
+            help.setImg1(helpRq.getImg1());
+            help.setImg2(helpRq.getImg2());
+            help.setImg3(helpRq.getImg3());
+            help.setUser(users);
+            helpRepository.save(help);
+            return new ResponseAll(true, "Success help");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseAll(false, "Failed to save Help");
+        }
+    }
+
+    @Override
     public List<Rent> getUserInRent(long HostId) {
         return rentRepository.getUserInRent(HostId);
     }
@@ -502,7 +524,7 @@ public class HostServiceImplement implements IhostService {
     private ResponseAll checkBan(long userId) {
         Optional<Users> usersOptional = userRepository.findById(userId);
         if (usersOptional.get().getConfirmation_status().equals("ban")) {
-            return new ResponseAll(false, "Your account has been locked for 30 days");
+            return new ResponseAll(false, "Bạn đang bị Cấm");
         }
         return new ResponseAll(true, "OK");
     }

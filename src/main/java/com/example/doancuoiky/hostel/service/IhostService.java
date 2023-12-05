@@ -34,6 +34,7 @@ public interface IhostService {
     int countRoomEmptyReal(long HostId);
     int contRoom(long HostId);
    int contRent(long HostId);
+   ResponseAll Help(HelpRq helpRq,long idHost);
 
    List<Rent> getUserInRent(long HostId);
     //load img

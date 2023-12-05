@@ -172,6 +172,7 @@ public class AdminServiceImplement implements IadminService{
         boolean isAdmin = checkAdmin(AdminId);
         if (isAdmin){
             userRepository.banUserStatusById(HostId);
+            reportRepository.deleteReportByHostId(HostId);
             return new ResponseAll (true,"ban Successfully");
         }
         return new ResponseAll (false,"you don't Admin");

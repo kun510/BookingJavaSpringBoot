@@ -20,6 +20,8 @@ public interface ReviewReponsitory extends JpaRepository<Review, Long> {
 
     @Query("SELECT r FROM Review r where r.room.id = :roomId ")
     List<Review> allReviewByRoom(@Param("roomId") long roomId);
+    @Query("SELECT r FROM Review r where r.room.user.id = :hostId ")
+    List<Review> allReviewByHost(@Param("hostId") long hostId);
 //    @Modifying
 //    @Transactional
 //    @Query("UPDATE Review r SET r.numberOfStars = :numberOfStars WHERE r.id = :reviewId")

@@ -37,7 +37,8 @@ public interface UserRepository extends JpaRepository<Users,Long> {
     @Query("UPDATE Users r SET r.confirmation_status = 'ban' WHERE r.id = :hostId")
     void banUserStatusById(@Param("hostId") long hostId);
 
-
+    @Query("SELECT u FROM Users u WHERE u.id = :idHost")
+    Users idHostByHelp(@Param("idHost") long idHost);
     @Transactional
     @Modifying
     @Query("UPDATE Users r SET r.confirmation_status = 'cancel' WHERE r.id = :hostId")

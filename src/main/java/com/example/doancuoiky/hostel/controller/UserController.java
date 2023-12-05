@@ -38,6 +38,10 @@ public class UserController {
     public List<Review> ReviewByRoom(@RequestParam long roomId){
         return iuserService.ReviewByRoom(roomId);
     }
+    @GetMapping("/getReviewHost")
+    public List<Review> ReviewByHost(@RequestParam long hostId){
+        return iuserService.ReviewByHost(hostId);
+    }
     @GetMapping("/getallroom")
     public List<Room> getAllRooms() {
         return iuserService.getAllRoom();
@@ -124,9 +128,10 @@ public class UserController {
         String confirmationStatus = user.getConfirmation_status();
         if ("wait for confirmation".equals(confirmationStatus)) {
             return ResponseEntity.ok(new Response("Wait for confirmation", null,""));
-        } else if ("ban".equals(confirmationStatus)) {
-            return ResponseEntity.ok(new Response("User is banned", null,""));
         }
+//        else if ("ban".equals(confirmationStatus)) {
+//            return ResponseEntity.ok(new Response("User is banned", null,""));
+//        }
 
         Role userRole = user.getRole();
         if (userRole != null) {
@@ -179,7 +184,7 @@ public class UserController {
     public ResponseEntity<?> sendNotification(@RequestBody NotificationMessaging notificationMessaging){
         ResponseAll responseAll =  iuserService.sendNotificationByToken(notificationMessaging);
         if (responseAll.isSuccess()){
-            return ResponseEntity.ok("ok");
+            return ResponseEntity.ok(new ResponseAll(true,"ok"));
         }
         else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + responseAll.getMessage());

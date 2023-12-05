@@ -3,10 +3,7 @@ package com.example.doancuoiky.hostel.controller;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.doancuoiky.hostel.model.*;
-import com.example.doancuoiky.hostel.request.AddBoarding;
-import com.example.doancuoiky.hostel.request.AddRoom;
-import com.example.doancuoiky.hostel.request.BillTotal;
-import com.example.doancuoiky.hostel.request.RegisterRq;
+import com.example.doancuoiky.hostel.request.*;
 import com.example.doancuoiky.hostel.response.Response;
 import com.example.doancuoiky.hostel.response.ResponseAll;
 import com.example.doancuoiky.hostel.service.IhostService;
@@ -33,6 +30,7 @@ public class HostController {
     private IhostService ihostService;
 
 
+
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRq users) {
         try {
@@ -51,6 +49,10 @@ public class HostController {
             LOGGER.error("Registration failed due to an exception: " + e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registration failed due to a server error");
         }
+    }
+    @PostMapping("/help")
+    public ResponseAll helpEndpoint(@RequestBody HelpRq helpRq, @RequestParam long idHost) {
+        return ihostService.Help(helpRq, idHost);
     }
 
     @PostMapping("/addRoom")

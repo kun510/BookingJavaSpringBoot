@@ -540,6 +540,11 @@ public class UserServiceImplement implements IuserService, UserDetailsService {
     }
 
     @Override
+    public List<Review> ReviewByHost(long hostId) {
+        return reviewReponsitory.allReviewByHost(hostId);
+    }
+
+    @Override
     public List<String> tokenUser(long hostId) {
         return rentRepository.tokenUser(hostId);
     }

@@ -69,7 +69,7 @@ public interface IuserService {
 
     List<Users> UserCurrent(long UserId);
     List<Review> ReviewByRoom (long roomId);
-
+    List<Review> ReviewByHost (long hostId);
     List<String> tokenUser(long hostId);
 
 }
